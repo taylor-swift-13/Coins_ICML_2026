@@ -1,0 +1,245 @@
+
+\section{RQ9: Why Do LLMs Fail to Prove Valid Specifications on Test Cases?}
+\label{appendix:rq9}
+
+While Gemini 3 Pro Preview demonstrates impressive capability in verifying individual test cases (achieving 75.61\% on \textsc{Pass}$_{\text{first}}$ with human specifications), its performance drops significantly when scaling to the full test suite (\textsc{Pass}$_{\text{all}}$). This gap suggests that verifying a diverse set of inputs introduces complexities that are not present in the first (often simple) test case.
+
+Through a qualitative analysis of failed verification attempts where the specification was known to be correct (or passed the first case), we identified three recurrent failure modes specific to the LLM's behavior as a theorem prover.
+
+\subsection{Phantom Goal Errors: Tactic-State Mismatch}
+A frequent error occurs when the model attempts to discharge verification conditions involving multiple logical conjunctions (e.g., $A \land B \land C$). The model often employs the \texttt{repeat split} tactic, assuming it must explicitly prove every sub-goal. However, Rocq's automation (specifically \texttt{split} combined with internal simplifications) often automatically discharges trivial sub-goals immediately.
+
+As illustrated in Figure~\ref{fig:phantom_goal_failure}, the model anticipates three sub-goals corresponding to the specification structure. It generates a proof script with three bullets. However, Rocq solves the first two sub-goals instantly, leaving only the third complex goal. The model then attempts to apply the tactic for the first phantom goal (e.g., \texttt{reflexivity}) to the actual remaining goal (e.g., a \texttt{forall} quantifier), causing a unification error.
+
+\begin{figure}[t!]
+    \centering
+    % === 外层大盒子：蓝色背景 ===
+    \begin{tcolorbox}[
+        enhanced,
+        title=\textbf{Failure Mode 1: The Phantom Goal Error (HumanEval/10)},
+        fonttitle=\bfseries\small,
+        colback=blue!3!white,    % 极淡蓝背景
+        colframe=blue!50!black,  % 深蓝边框
+        boxrule=0.8pt,
+        arc=2pt,
+        before skip=10pt,
+        after skip=10pt
+    ]
+    
+    % --- Part 1: Specification Snippet ---
+    \textbf{Specification Snippet:}
+    \vspace{2pt}
+    
+    % 白色内盒子：无边框，纯白背景
+    \begin{tcolorbox}[
+        colback=white,
+        colframe=white,
+        frame hidden,       % 强制隐藏边框
+        boxrule=0pt,
+        sharp corners,
+        top=3pt, bottom=3pt, left=3pt, right=3pt
+    ]
+    \begin{lstlisting}[
+        language=Coq, 
+        frame=none, 
+        basicstyle=\ttfamily\scriptsize, 
+        aboveskip=0pt,
+        belowskip=0pt,
+        breaklines=true,
+        backgroundcolor={} 
+    ]
+Definition problem_10_spec (input output : string) : Prop :=
+  prefix input output = true /\      (* Part 1: Trivial for empty string *)
+  palindrome output /\               (* Part 2: Trivial for empty string *)
+  forall p : string, ...             (* Part 3: Complex minimality condition *)
+    \end{lstlisting}
+    \end{tcolorbox}
+
+    \vspace{0.2cm}
+    
+    % --- Part 2: The Mismatch ---
+    \textbf{The Mismatch:}
+    \vspace{2pt}
+    
+    \begin{tcolorbox}[
+        colback=white,
+        colframe=white,
+        frame hidden,
+        boxrule=0pt,
+        sharp corners,
+        top=3pt, bottom=3pt, left=3pt, right=3pt
+    ]
+    \begin{lstlisting}[
+        language=Coq, 
+        frame=none, 
+        basicstyle=\ttfamily\scriptsize,
+        aboveskip=0pt,
+        belowskip=0pt,
+        breaklines=true,
+        escapechar=!,
+        backgroundcolor={} 
+    ]
+(* Test case: input = "", output = "" *)
+Example test_problem_10_empty : problem_10_spec "" "".
+Proof.
+  unfold problem_10_spec.
+  repeat split.
+  (* AT THIS POINT: Rocq solves Part 1 & 2 automatically. *)
+  (* Only Part 3 remains. But the model thinks all 3 goals exist. *)
+
+  - (* Model attempts to prove Part 1 (prefix "" "" = true) *)
+    simpl.
+    reflexivity. 
+    (* ERROR: Rocq tries to apply reflexivity to Part 3 (forall p...) *)
+    
+  - (* Model code for Part 2... (Dead code) *)
+  - (* Model code for Part 3... (Dead code) *)
+Qed.
+    \end{lstlisting}
+    \end{tcolorbox}
+
+    \vspace{0.2cm}
+    
+    % --- Part 3: Compiler Error (Red Box) ---
+    \textbf{Rocq Compiler Error:}
+    \vspace{2pt}
+    \begin{tcolorbox}[
+        colback=red!5!white,
+        colframe=red!75!black,
+        left=2pt, right=2pt, top=2pt, bottom=2pt,
+        arc=0mm, boxrule=0.5pt,
+        title=Compiler Output,
+        fonttitle=\bfseries\scriptsize,
+        coltitle=white
+    ]
+    \footnotesize\ttfamily\color{red!40!black}
+        In environment...\\
+    Unable to unify "String.length p" with "0".
+    \end{tcolorbox}
+    \end{tcolorbox}
+    
+    \caption{\textbf{Tactic-State Mismatch Example.} The model hallucinates a proof state with three sub-goals. Because Rocq automatically solved the first two, the model applies the tactic for the first goal (\texttt{reflexivity}) to the third goal (an inequality), leading to a unification failure.}
+    \label{fig:phantom_goal_failure}
+\end{figure}
+
+\subsection{The Library Barrier: Complex Inductive Predicates}
+When specifications involve complex standard library predicates—specifically \texttt{Permutation} (for sorting/reordering tasks) or \texttt{NoDup} (for uniqueness constraints)—the model's proof capability degrades sharply. 
+Unlike basic arithmetic which can often be solved by \texttt{lia}, proving properties about permutations requires selecting the correct lemmas from the \texttt{Coq.Sorting.Permutation} library. The model frequently attempts to unfold these definitions and prove them from scratch using low-level tactics, which leads to unmanageably long proof contexts or getting stuck in inductive steps that require auxiliary lemmas.
+
+As illustrated in Figure~\ref{fig:library_barrier_failure}, the model often fails to utilize high-level automation and instead resorts to brittle manual proof constructions.
+
+\begin{figure}[t!]
+    \centering
+    % === 外层大盒子：蓝色背景 ===
+    \begin{tcolorbox}[
+        enhanced,
+        title=\textbf{Failure Mode 2: Inability to Discharge Library Predicates (HumanEval/33)},
+        fonttitle=\bfseries\small,
+        colback=blue!3!white,    % 极淡蓝背景
+        colframe=blue!50!black,  % 深蓝边框
+        boxrule=0.8pt,
+        arc=2pt,
+        before skip=10pt,
+        after skip=10pt
+    ]
+    
+    % --- Part 1: Specification Snippet ---
+    \textbf{Specification Snippet:}
+    \vspace{2pt}
+    
+    % 白色内盒子：无边框，纯白背景
+    \begin{tcolorbox}[
+        colback=white,
+        colframe=white,
+        frame hidden,       % 强制隐藏边框
+        boxrule=0pt,
+        sharp corners,
+        top=3pt, bottom=3pt, left=3pt, right=3pt
+    ]
+    \begin{lstlisting}[
+        language=Coq, 
+        frame=none, 
+        basicstyle=\ttfamily\scriptsize, 
+        aboveskip=0pt,
+        belowskip=0pt,
+        breaklines=true,
+        backgroundcolor={} 
+    ]
+Definition problem_33_spec (input output : list Z) : Prop :=
+  (* 1. input is a Permutation of output *)
+  Permutation input output /\
+  (* 2. values at non-divisible indices are preserved *)
+  (forall (i : nat), ...) /\ 
+  (* 3. elements at indices divisible by 3 are sorted *)
+  (forall (i j : nat), ...).
+    \end{lstlisting}
+    \end{tcolorbox}
+
+    \vspace{0.2cm}
+    
+    % --- Part 2: The Mismatch ---
+    \textbf{The Mismatch:}
+    \vspace{2pt}
+    
+    \begin{tcolorbox}[
+        colback=white,
+        colframe=white,
+        frame hidden,
+        boxrule=0pt,
+        sharp corners,
+        top=3pt, bottom=3pt, left=3pt, right=3pt
+    ]
+    \begin{lstlisting}[
+        language=Coq, 
+        frame=none, 
+        basicstyle=\ttfamily\scriptsize,
+        aboveskip=0pt,
+        belowskip=0pt,
+        breaklines=true,
+        escapechar=|,
+        backgroundcolor={} 
+    ]
+Example test_case_problem_33 : problem_33_spec [2; 10; 20...] [2; 10; 20...].
+Proof.
+  unfold problem_33_spec.
+  split.
+  - (* Part 1: Permutation. Model tries manual construction *)
+    apply Permutation_cons. 
+    (* This tactic creates subgoals: head equality (2=2) and tail Permutation *)
+    apply Permutation_cons.
+    (* ERROR: Model applies Permutation_cons again, but likely 
+       focused on the equality subgoal (2%Z = 2%Z) instead of the list *)
+    apply Permutation_trans.
+    
+  - (* Part 2... *)
+    \end{lstlisting}
+    \end{tcolorbox}
+
+    \vspace{0.2cm}
+    
+    % --- Part 3: Compiler Error (Red Box) ---
+    \textbf{Rocq Compiler Error:}
+    \vspace{2pt}
+    \begin{tcolorbox}[
+        colback=red!5!white,
+        colframe=red!75!black,
+        left=2pt, right=2pt, top=2pt, bottom=2pt,
+        arc=0mm, boxrule=0.5pt,
+        title=Compiler Output,
+        fonttitle=\bfseries\scriptsize,
+        coltitle=white
+    ]
+    \footnotesize\ttfamily\color{red!40!black}
+    Unable to unify\\
+    "forall x y : ?M1435, x = y -> Morphisms.respectful ..."\\
+    with "2\%Z = 2\%Z".
+    \end{tcolorbox}
+    \end{tcolorbox}
+    
+    \caption{\textbf{Library Predicate Failure.} Instead of using automation (e.g., \texttt{Permutation\_refl}), the model attempts a brittle manual proof. The error occurs when it tries to apply a Permutation lemma to a subgoal that requires proving numerical equality (\texttt{2\%Z = 2\%Z}), revealing a lack of awareness regarding the proof state evolution of complex library predicates.}
+    \label{fig:library_barrier_failure}
+\end{figure}
+
+\subsection{Resource Exhaustion on Large Inputs}
+The \textsc{Pass}$_{\text{all}}$ phase introduces generated test cases with significantly larger numerical values than the canonical examples. 
+When specifications are defined using Peano natural numbers (\texttt{nat}) or structurally recursive functions without tail-call optimization, verifying large inputs triggers \textbf{Stack Overflow} errors during Rocq's normalization process (e.g., using \texttt{simpl} or \texttt{compute}). Even when using binary integers (\texttt{Z}), models sometimes generate inefficient proof scripts that attempt to unfold computations explicitly rather than using efficient reduction strategies like \texttt{vm\_compute}, causing the verifier to crash or time out.

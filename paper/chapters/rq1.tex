@@ -1,0 +1,55 @@
+
+\label{sec:rq1}
+
+% A core challenge in assessing specification quality is its inherent dependence on verification. We highlight this as a key observation:
+
+A core challenge in assessing specification quality is its inherent dependence on verification. In our early experiments, we attempted to verify specifications by proving that canonical implementations conform to them---the standard approach in formal verification. However, we found that such proofs are extremely complex and resist automation even when the specification is semantically correct. This difficulty is not unique to our setting: even in established benchmarks~\cite{thakur2025clever,ye2026verina}, ground-truth specifications are often validated only informally, rather than via rigorous formal proofs against implementations. We highlight this as a key observation:
+
+
+\vspace{0.6em}
+\begin{tcolorbox}[
+  colback=gray!10,
+  colframe=gray!60,
+  boxrule=0.6pt,
+  arc=2pt,
+  left=6pt,
+  right=6pt,
+  top=6pt,
+  bottom=6pt
+]
+\small
+\label{duality}
+\textbf{Evaluation Duality.}
+When a specification fails to be verified, it is unclear whether the fault lies
+in the specification itself or in the prover.
+Stronger provers more accurately expose specification correctness,
+while more correct specifications more reliably assess prover capability.
+\end{tcolorbox}
+\vspace{0.6em}
+
+
+To break this cyclic dependency and minimize evaluation uncertainty, we anchor one side of the duality with our manually crafted specifications. While we cannot claim these as absolute ground truth, they have undergone careful human review and we believe them to be of higher quality than LLM-generated alternatives. Using these reference specifications, we evaluate multiple LLMs by measuring their \textsc{Pass}$_{\text{all}}$ rate on the associated proof objectives. The best-performing model is then adopted as the verifier for all subsequent experiments, providing the most reliable assessment of generated specification quality.
+
+
+\begin{table}[!t]
+\centering
+\caption{Verification Performance Across Different Models (n=164). {\footnotesize\textit{Models ordered chronologically by release date. Best performing model highlighted. Higher values indicate better performance.}}}
+\label{tab:verification}
+\small
+\begin{tabular}{@{} l c c @{}}
+\toprule
+\textbf{Verify Model} & \textbf{\textsc{Pass}$_{\text{first}}$} & \textbf{\textsc{Pass}$_{\text{all}}$} \\
+\midrule
+GPT-4o            & 37.20\% \textcolor{gray}{(61)}  & 7.32\% \textcolor{gray}{(12)} \\
+Claude 3.7 Sonnet & 30.49\% \textcolor{gray}{(50)}  & 3.66\% \textcolor{gray}{(6)}  \\
+GPT-5             & 60.98\% \textcolor{gray}{(100)} & 16.46\% \textcolor{gray}{(27)} \\
+DeepSeek-V3.1     & 46.95\% \textcolor{gray}{(77)}  & 0.00\% \textcolor{gray}{(0)}  \\
+Claude 4.5 Opus   & 72.56\% \textcolor{gray}{(119)} & 19.51\% \textcolor{gray}{(32)} \\
+\rowcolor{cyan!8}
+Gemini 3 Pro Preview & \textcolor{cyan!70!black}{\textbf{75.61\%}} \textcolor{gray}{(124)} & \textcolor{cyan!70!black}{\textbf{30.49\%}} \textcolor{gray}{(50)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+Based on the evaluation shown in Table~\ref{tab:verification}, we identify Gemini 3 Pro Preview as the strongest overall performer in proof synthesis. Consequently, we select Gemini 3 Pro Preview as the primary proof engine for subsequent experiments. However, even Gemini 3 Pro Preview's performance remains far from ideal—achieving only 30.49\% \textsc{Pass}$_{\text{all}}$ on human-crafted specifications highlights the substantial gap between current LLM capabilities and reliable automated theorem proving.

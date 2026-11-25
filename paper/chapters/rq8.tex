@@ -1,0 +1,63 @@
+\section{RQ8: Does Input Data Complexity Dictate the Success of Formal Specification Generation?}
+\label{appendix:rq8}
+
+To investigate whether the complexity of the input data structure influences the difficulty of generating precise specifications, we categorized the 164 HumanEval problems based on their input argument types. 
+We analyze the relationship between these input categories and the models' ability to generate \textbf{candidate specifications}---defined as specifications that satisfy the \textsc{Reject}$_{\text{all}}$ criterion (i.e., they accept all positive test cases and successfully reject negative test cases).
+
+We grouped the input types into five distinct categories:
+\begin{itemize}
+    \item \textbf{Basic Numeric:} Scalars involving \texttt{Z}, \texttt{nat}, \texttt{float}, and \texttt{R}.
+    \item \textbf{String:} Pure string manipulation tasks.
+    \item \textbf{List Numeric:} Lists containing numeric types (\texttt{list Z}, \texttt{list nat}, etc.).
+    \item \textbf{List String:} Lists of strings (\texttt{list string}).
+    \item \textbf{Complex/Nested:} Nested structures (e.g., \texttt{list list Z}), dictionaries, or custom types.
+\end{itemize}
+
+We categorize the problems into three groups based on model performance:
+\begin{itemize}
+    \item \textbf{Weak Accessible}: Problems where at least one of the ``Weak Models'' (GPT-4o, Claude 3.7 Sonnet, DeepSeek-V3.1) successfully generated a candidate specification; 
+    \item \textbf{Strong Exclusive}: Problems where valid candidates were produced \emph{only} by the ``Strong Models'' (Gemini 3 Pro Preview, GPT-5, Claude 4.5 Opus); 
+    \item \textbf{No Valid Spec}: Problems where no model across either group achieved the \textsc{Reject}$_{\text{all}}$ criterion.
+\end{itemize}
+
+\subsection{Quantitative Results}
+
+Table~\ref{tab:input-type-breakdown} presents the distribution of valid specifications across input types. The data reveals a strong correlation between input complexity and the ability to generate sufficiently precise specifications that pass the \textsc{Reject}$_{\text{all}}$ filter.
+
+\begin{table}[ht]
+  \caption{Distribution of Valid Candidate Specifications (Passing \textsc{Reject}$_{\text{all}}$) by Input Type. \textbf{Weak Accessible} denotes problems where at least one weak model produced a valid spec. \textbf{Strong Exclusive} denotes problems where only strong models produced valid specs. \textbf{No Valid Spec} denotes problems where no model passed \textsc{Reject}$_{\text{all}}$.}
+  \label{tab:input-type-breakdown}
+  \begin{center}
+    \begin{small}
+      \begin{sc}
+        \begin{tabular}{lcccc}
+          \toprule
+          Input Category & Total & Weak Accessible & Strong Exclusive & No Valid Spec \\
+          \midrule
+          Basic Numeric   & 43 & 6 (14.0\%) & 9 (20.9\%)           & 28 (65.1\%) \\
+          String          & 49 & 2 (4.1\%)  & \textbf{20 (40.8\%)} & 27 (55.1\%) \\
+          List Numeric    & 56 & 2 (3.6\%)  & 16 (28.6\%)          & 38 (67.9\%) \\
+          List String     & 9  & 1 (11.1\%) & 1 (11.1\%)           & 7 (77.8\%)  \\
+          Complex/Nested  & 7  & 0 (0.0\%)  & 2 (28.6\%)           & 5 (71.4\%)  \\
+          \midrule
+          \textbf{Total}  & \textbf{164} & \textbf{11 (6.7\%)} & \textbf{48 (29.3\%)} & \textbf{105 (64.0\%)} \\
+          \bottomrule
+        \end{tabular}
+      \end{sc}
+    \end{small}
+  \end{center}
+  \vskip -0.1in
+\end{table}
+
+\subsection{Analysis of Failure Modes}
+
+\paragraph{The String Gap: Frontier Models' Moat.}
+The most striking disparity appears in the \textbf{String} category. While weak models achieved a negligible 4.1\% success rate in generating valid candidates, strong models exclusively covered 40.8\% of string problems. 
+In Rocq, specifying string properties requires handling the inductive \texttt{string} type (essentially a list of ASCII characters). Weak models often fail to satisfy \textsc{Reject}$_{\text{all}}$ because they generate overly permissive specifications (e.g., using Pythonic logic that doesn't strictly constrain the Rocq string behavior) or fail to construct the necessary inductive predicates to rule out incorrect implementations. Frontier models demonstrate a superior ability to formalize these structural constraints precisely.
+
+\paragraph{Arithmetic vs. Structural Reasoning.}
+Weak models perform best in the \textbf{Basic Numeric} category (6 out of their 11 successes). This suggests that their ability to generate precise specifications is largely limited to First-Order Arithmetic. However, performance drops precipitously when shifting to \textbf{List Numeric} types (3.6\% success).
+For lists, passing \textsc{Reject}$_{\text{all}}$ requires the specification to be strict enough to reject incorrect list manipulations (e.g., off-by-one errors or incorrect permutations). Weak models struggle to synthesize the complex `Forall` or recursive predicates needed to tightly constrain list behaviors, resulting in specifications that are either too loose (failing \textsc{Reject}$_{\text{all}}$) or syntactically invalid.
+
+\paragraph{The Complexity Barrier.}
+As input complexity increases to \textbf{List String} and \textbf{Complex/Nested} types, the failure rate for generating valid specifications rises to over 70\% across all models. Problems involving nested data structures (e.g., \texttt{list list nat}) require specifications that handle multiple layers of induction. The high failure rate in the ``No Valid Spec'' column for these categories indicates that even the strongest models currently struggle to generate formal specifications that are precise enough to distinguish correct implementations from incorrect ones when the data structure complexity exceeds basic scalar or linear types.

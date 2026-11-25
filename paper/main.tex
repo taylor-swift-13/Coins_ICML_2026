@@ -1,0 +1,870 @@
+%%%%%%%% ICML 2026 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
+
+% \documentclass{article}
+
+% % Recommended, but optional, packages for figures and better typesetting:
+% \usepackage{microtype}
+% \usepackage{graphicx}
+% \usepackage{subcaption}
+% \usepackage{booktabs} % for professional tables
+% \newcommand{\ours}{\textsc{Coins}}  % 或你的框架名称
+% \usepackage[utf8]{inputenc}
+% \usepackage{pgfplots}
+% \usepackage{tikz}
+% \pgfplotsset{compat=1.18}
+% \usepackage{lmodern}
+
+
+
+
+% % hyperref makes hyperlinks in the resulting PDF.
+% % If your build breaks (sometimes temporarily if a hyperlink spans a page)
+% % please comment out the following usepackage line and replace
+% % \usepackage{icml2026} with \usepackage[nohyperref]{icml2026} above.
+% \usepackage{hyperref}
+
+% % Attempt to make hyperref and algorithmic work together better:
+
+
+% % Use the following line for the initial blind version submitted for review:
+% \usepackage{icml2026}
+
+% % For preprint, use
+% % \usepackage[preprint]{icml2026}
+
+% % If accepted, instead use the following line for the camera-ready submission:
+% % \usepackage[accepted]{icml2026}
+
+% \usepackage{amsmath}
+% \usepackage{amssymb}
+% \usepackage{mathtools}
+% \usepackage{amsthm}
+% \usepackage{amsmath, amssymb,amsfonts}
+% \usepackage{amsthm}
+% \usepackage{algorithmic}
+% \usepackage{graphicx}
+% \usepackage{textcomp}
+% \usepackage{multirow}
+% \usepackage{pifont}
+% \newcommand{\xmark}{\ding{55}}
+% %\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+% \usepackage[utf8]{inputenc}
+% \usepackage{mathrsfs} % 移除尾部空格
+% \usepackage{listings}
+% \usepackage{enumitem}
+% \usepackage{url}
+% \newcommand{\vst}{\textbf{VST User Assertions}}
+% \newcommand{\acsl}{\textbf{ACSL}}
+
+% \usepackage{array}
+% \usepackage{mathtools}
+% \usepackage{fancyvrb}
+% \usepackage{enumitem}
+% \usepackage{makecell}
+% \usepackage[most]{tcolorbox}
+% \tcbuselibrary{breakable}
+
+% \newtcolorbox{promptbox}[1]{
+%   breakable,
+%   colback=gray!3,
+%   colframe=gray!60,
+%   title=\textbf{#1},
+%   fonttitle=\bfseries,
+%   left=1mm,
+%   right=1mm,
+%   top=1mm,
+%   bottom=1mm
+% }
+
+
+% \usepackage{colortbl}
+% \usepackage[table]{xcolor}
+
+% \usepackage{siunitx}  % 对齐百分比
+
+% \usepackage{tikz}
+
+% \newcommand{\circled}[1]{%
+%   \tikz[baseline=(char.base)]{
+%     \node[shape=circle,draw,inner sep=1pt] (char) {#1};
+%   }%
+% }
+
+
+% % 定义渐变色（蓝→白）
+% \definecolor{myblue}{RGB}{0,100,200}
+% \newcommand{\heat}[1]{%
+%     \cellcolor{myblue!\numexpr#1\relax!white}{#1\%}%
+% }
+
+% \renewcommand{\arraystretch}{1.4}
+% \setlist[itemize]{noitemsep, topsep=0pt}
+% \definecolor{myred}{rgb}{0.8, 0.1, 0.1}
+
+
+% % if you use cleveref..
+% \usepackage[capitalize,noabbrev]{cleveref}
+% \usepackage{listings}
+% \usepackage{xcolor}
+
+% % 定义 Rocq 语言高亮样式
+% \lstdefinelanguage{Coq}{
+%     morekeywords={Definition, Inductive, Fixpoint, forall, exists, Prop, bool, list, string, match, with, end, if, then, else, return, cases, unfold, simpl, reflexivity, by, intro, apply, and, let, in, Some, None},
+%     sensitive=true,
+%     morecomment=[s]{(*}{*)},
+%     morestring=[b]",
+%     morekeywords=[2]{->, <-, <->, =>, /\, \/, ~},
+%     alsoletter={<, >, -, =, /\, \/},
+% }
+
+% \usepackage{array}
+% \usepackage{colortbl}
+% \usepackage[table]{xcolor}
+% \usepackage{tabularx} % 请确保在导言区添加此宏包
+% \usepackage{booktabs}
+
+% % 定义代码框通用样式
+% \lstset{
+%     language=Coq,
+%     basicstyle=\ttfamily\footnotesize, % 使用等宽小号字体
+%     keywordstyle=\color{blue}\bfseries,
+%     commentstyle=\color{gray}\itshape,
+%     stringstyle=\color{purple},
+%     numbers=none,                      % 如果空间紧张，不显示行号
+%     breaklines=true,                   % 自动换行（关键！）
+%     breakatwhitespace=true,            % 只在空格处换行
+%     showstringspaces=false,
+%     frame=single,                      % 加一个细边框
+%     framerule=0.5pt,
+%     rulecolor=\color{gray!30},
+%     backgroundcolor=\color{gray!5},    % 极浅灰色背景
+%     xleftmargin=2pt,
+%     xrightmargin=2pt,
+%     aboveskip=10pt,
+%     belowskip=10pt,
+%     columns=flexible,
+%     keepspaces=true,
+% }
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % THEOREMS
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \theoremstyle{plain}
+% \newtheorem{theorem}{Theorem}[section]
+% \newtheorem{proposition}[theorem]{Proposition}
+% \newtheorem{lemma}[theorem]{Lemma}
+% \newtheorem{corollary}[theorem]{Corollary}
+% \theoremstyle{definition}
+% \newtheorem{definition}[theorem]{Definition}
+% \newtheorem{assumption}[theorem]{Assumption}
+% \theoremstyle{remark}
+% \newtheorem{remark}[theorem]{Remark}
+
+% % Todonotes is useful during development; simply uncomment the next line
+% %    and comment out the line below the next line to turn off comments
+% %\usepackage[disable,textsize=tiny]{todonotes}
+% \usepackage[textsize=tiny]{todonotes}
+
+% \newcommand{\comment}[1]{{\color{red} #1}}
+% \newcommand{\oomit}[1]{}
+\documentclass{article}
+
+% ── Typography & encoding ──
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{textcomp}
+
+% ── Color (load early, before other packages that depend on it) ──
+\usepackage[table]{xcolor}
+\definecolor{myblue}{RGB}{0,100,200}
+\definecolor{myred}{rgb}{0.8, 0.1, 0.1}
+
+% ── Math ──
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage{mathrsfs}
+
+% ── Figures & tables ──
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{makecell}
+
+% ── Lists ──
+\usepackage{enumitem}
+\setlist[itemize]{noitemsep, topsep=0pt}
+
+% ── Algorithms ──
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% ── Listings (code) ──
+\usepackage{listings}
+\usepackage{fancyvrb}
+
+\lstdefinelanguage{Coq}{
+    morekeywords={Definition, Inductive, Fixpoint, forall, exists, Prop, bool, list, string, match, with, end, if, then, else, return, cases, unfold, simpl, reflexivity, by, intro, apply, and, let, in, Some, None},
+    sensitive=true,
+    morecomment=[s]{(*}{*)},
+    morestring=[b]",
+    morekeywords=[2]{->, <-, <->, =>, /\, \/, ~},
+    alsoletter={<, >, -, =, /\, \/},
+}
+
+\lstset{
+    language=Coq,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{purple},
+    numbers=none,
+    breaklines=true,
+    breakatwhitespace=true,
+    showstringspaces=false,
+    frame=single,
+    framerule=0.5pt,
+    rulecolor=\color{gray!30},
+    backgroundcolor=\color{gray!5},
+    xleftmargin=2pt,
+    xrightmargin=2pt,
+    aboveskip=10pt,
+    belowskip=10pt,
+    columns=flexible,
+    keepspaces=true,
+}
+
+% ── TikZ & PGFPlots ──
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% ── Boxes ──
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{breakable}
+
+\newtcolorbox{promptbox}[1]{
+  breakable,
+  colback=gray!3,
+  colframe=gray!60,
+  title=\textbf{#1},
+  fonttitle=\bfseries,
+  left=1mm, right=1mm, top=1mm, bottom=1mm
+}
+
+% ── Symbols ──
+\usepackage{pifont}
+\newcommand{\xmark}{\ding{55}}
+
+% ── Hyperlinks ──
+\usepackage{hyperref}
+\usepackage{url}
+
+% ── ICML style (after hyperref) ──
+\usepackage[accepted]{icml2026}
+
+% ── Cleveref (must be after hyperref) ──
+\usepackage[capitalize,noabbrev]{cleveref}
+
+% ── Theorems ──
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+% ── Custom commands ──
+\newcommand{\ours}{\textsc{Coins}}
+\newcommand{\vst}{\textbf{VST User Assertions}}
+\newcommand{\acsl}{\textbf{ACSL}}
+\newcommand{\oomit}[1]{}
+\renewcommand{\arraystretch}{1.4}
+
+\newcommand{\heat}[1]{%
+    \cellcolor{myblue!\numexpr#1\relax!white}{#1\%}%
+}
+\newcommand{\circled}[1]{%
+  \tikz[baseline=(char.base)]{
+    \node[shape=circle,draw,inner sep=1pt] (char) {#1};
+  }%
+}
+
+% ── Dev tools ──
+\usepackage[disable,textsize=tiny]{todonotes}
+
+% The \icmltitle you define below is probably too long as a header.
+% Therefore, a short form for the running title is supplied here:
+\icmltitlerunning{How Powerful Are LLMs in Generating Formal
+Program Specifications?}
+
+
+
+
+
+\begin{document}
+
+\twocolumn[
+\icmltitle{
+%Evaluating LLM-Generated Specifications and Proofs in Rocq
+How Powerful Are LLMs in Generating Formal Program Specifications?
+}
+  
+
+  % It is OKAY to include author information, even for blind submissions: the
+  % style file will automatically remove it for you unless you've provided
+  % the [accepted] option to the icml2026 package.
+
+  % List of affiliations: The first argument should be a (short) identifier you
+  % will use later to specify author affiliations Academic affiliations
+  % should list Department, University, City, Region, Country Industry
+  % affiliations should list Company, City, Region, Country
+
+  % You can specify symbols, otherwise they are numbered in order. Ideally, you
+  % should not use this facility. Affiliations will be numbered in order of
+  % appearance and this is the preferred way.
+  \icmlsetsymbol{equal}{*}
+
+  \begin{icmlauthorlist}
+    \icmlauthor{Fanpeng Yang}{equal,ios,ucas}
+    \icmlauthor{Xing Li}{equal,ios,ucas}
+    \icmlauthor{Shuling Wang}{ios,ucas}
+    \icmlauthor{Jie An}{ios,ucas}
+    \icmlauthor{Zeyu Sun}{ios}
+    \icmlauthor{Shenghua Feng}{ios}
+    \icmlauthor{Wenhan Wang}{ios}
+    \icmlauthor{Weiyi Wang}{ios}
+    \icmlauthor{Naijun Zhan}{pku,zgc}
+    \icmlauthor{Fanjiang Xu}{ios,ucas}
+  \end{icmlauthorlist}
+
+  \icmlaffiliation{ios}{Institute of Software, Chinese Academy of Sciences, Beijing, China}
+  \icmlaffiliation{ucas}{University of the Chinese Academy of Sciences, Beijing, China}
+  \icmlaffiliation{pku}{School of Computer Science \& Key Lab. of High Confidence Software Technologies
+of Ministry of Education, Peking University, Beijing, China}
+  \icmlaffiliation{zgc}{Zhongguancun Lab., Beijing, China}
+  % \icmlaffiliation{nkl}{National Key Laboratory of Space Integrated Information System, Institute of Software, Chinese Academy of Sciences, Beijing, China}
+
+  \icmlcorrespondingauthor{Jie An}{anjie@iscas.ac.cn}
+  \icmlcorrespondingauthor{Zeyu Sun}{zuyu.zys@gmail.com}
+  \icmlcorrespondingauthor{Shenghua Feng}{fengshenghua@iscas.ac.cn}
+
+  % You may provide any keywords that you find helpful for describing your
+  % paper; these are used to populate the "keywords" metadata in the PDF but
+  % will not be shown in the document
+  \icmlkeywords{Machine Learning, ICML}
+
+  \vskip 0.3in
+]
+
+% this must go after the closing bracket ] following \twocolumn[ ...
+
+% This command actually creates the footnote in the first column listing the
+% affiliations and the copyright notice. The command takes one argument, which
+% is text to display at the start of the footnote. The \icmlEqualContribution
+% command is standard text for equal contribution. Remove it (just {}) if you
+% do not need this facility.
+
+% Use ONE of the following lines. DO NOT remove the command.
+\printAffiliationsAndNotice{\icmlEqualContribution}
+
+\begin{abstract}
+
+Formal verification provides strong guarantees of software correctness, but its adoption is limited by the high cost of writing precise formal specifications. While recent large language models (LLMs) have shown strong capabilities in theorem proving and verified code generation, their true ability to generate program specifications remains unclear. Existing evaluations require either verifying implementation conformance or proving semantic equivalence between specifications, both of which are formidably difficult and may conflate proof difficulty with specification quality. To address this problem, we introduce \textsc{Coins}, a Rocq based evaluation framework that assesses specification quality by instantiating specifications under evaluation on trusted test cases and generating concrete proof obligations. This design aligns with the asymmetric nature of formal reasoning, where successful proofs provide reliable evidence while proof failures are inherently ambiguous. Using \textsc{Coins}, we conduct a large scale study on HumanEval with a curated set of human written Rocq specifications. Our results show that specification generation remains a formidable challenge, and that verification complexity can obscure genuine differences in specification quality. Overall, we find that accurate specification evaluation, rather than model scaling alone, is central to understanding the power of LLMs for specification synthesis, and that test case based formal reasoning offers a more faithful and discriminative measure of progress.
+
+
+\end{abstract}
+
+\section{Introduction}
+\input{chapters/intro}
+
+\section{Program Specification}
+\input{chapters/motivation}
+
+\section{Evaluation Framework}
+\input{chapters/eval}
+
+\section{Experiments}
+
+We evaluate the ability of LLMs to generate formal specifications. While recent work has explored LLM-assisted verification and proof synthesis, the quality of LLM-generated specifications themselves remains largely unexamined. This gap is nontrivial: when verification fails, it is often unclear whether the cause lies in an incorrect specification or in limited proof capability. To address this challenge, we formulate four research questions (RQs), each supported by a targeted experimental design within the \textsc{Coins} framework shown in Section~\ref{sec:framework}.
+
+% \textbf{RQ1--RQ2: Intrinsic difficulty of specification generation.}
+% \textbf{RQ1} identifies the most reliable verifier using human-crafted specifications, anchoring one side of the evaluation duality. \textbf{RQ2} then evaluates LLM-generated specifications through our multi-stage pipeline, revealing where generation fails.
+
+% \textbf{RQ3: Interference from verification difficulty.}
+% \textbf{RQ3} disentangles errors caused by weak specifications from those due to insufficient proof power.
+
+% \textbf{RQ4: Impact of specification style.}
+% \textbf{RQ4} investigates the impact of using executable \texttt{Fixpoint} definitions versus relational \texttt{Inductive} predicates on clarity, compositionality, and verifiability.
+
+Our study is organized around four research questions. RQ1 aims to identify the most reliable verifier using human-crafted specifications, thereby anchoring one side of the evaluation duality; building on this, RQ2 evaluates LLM-generated specifications through our multi-stage pipeline to reveal where generation fails, with the two together characterizing the intrinsic difficulty of specification generation. RQ3 addresses the interference from verification difficulty by disentangling errors caused by weak specifications from those due to insufficient proof power. Finally, RQ4 investigates the impact of specification style, examining how the use of executable \texttt{Fixpoint} definitions versus relational \texttt{Inductive} predicates affects clarity, compositionality, and verifiability.
+
+Additional experimental results and analyses, including the human-vs-LLM specification comparison, error analysis, case studies, and comparisons with alternative evaluation metrics, are deferred to Appendices~\ref{appendix:human-llm},~\ref{appendix:rq6},~\ref{appendix:rq7},~\ref{appendix:rq8},~\ref{appendix:rq9}, and~\ref{appendix:rq10}.
+
+
+\textbf{Model Selection.} To ensure a comprehensive evaluation, we select six large language models from four leading organizations. Our selection includes frontier models from Q4 2025: \textbf{GPT-5} (OpenAI), \textbf{Claude 4.5 Opus} (Anthropic), and \textbf{Gemini 3 Pro Preview} (Google), as well as widely adopted earlier models: \textbf{GPT-4o}, \textbf{Claude 3.7 Sonnet}. We also include \textbf{DeepSeek-V3.1}, a state-of-the-art, open-source model from DeepSeek. This diversity enables evaluation across both capability tiers and organizational implementations.
+
+\textbf{Experimental Configuration.}
+All models are accessed via their official APIs under a unified evaluation protocol.
+% We fix the temperature to 0.7 and leave all other parameters at provider defaults.
+For each proof generation task, models are allowed up to three attempts, with compiler or verifier error feedback provided between attempts.
+Detailed model configurations and the full prompt templates used in all experiments are provided in Appendix~\ref{appendix:config}.
+
+
+\subsection{RQ1: Which LLM Serves as the Most Reliable Verifier?}
+\input{chapters/rq1}
+
+\subsection{RQ2: What Observations Can be Derived from the Evaluation Results?}
+
+\input{chapters/rq2}
+
+
+% \subsection{RQ2: How do different LLMs perform on \textsc{Coins}?}
+% To address this question, we assemble a diverse set of models spanning multiple organizations and release periods. Our selection includes both frontier models that represent current state-of-the-art capabilities (GPT-5, Claude-Opus-4.5, and Gemini-3-Pro) and widely adopted models that have served as baselines in prior work (GPT-4o, DeepSeek-V3.1, and Claude-Sonnet-3.7).
+
+% Our experimental design proceeds in two phases. In the first phase, each model independently generates specifications and attempts to verify them using itself as the proof engine, progressing through the \textsc{Coins} pipeline up to the \textsc{Pass}$_{\text{all}}$ stage. This self-evaluation establishes a baseline for each model’s ability in both specification generation and proof synthesis. In the second phase, we select the top three models according to their \textsc{Pass}$_{\text{all}}$ performance and fix them as verification engines. These models are then used to verify, at the \textsc{Pass}$_1$ stage only, the specifications generated by other models. This design allows us to isolate proof synthesis ability from specification generation quality while avoiding confounding effects from multi-test-case verification.
+
+% \paragraph{Evaluation Results and Analysis.}
+% Table~\ref{tab:cross-model-eval} summarizes the evaluation results. In the first phase, all six models undergo self-evaluation across syntactic validation, \textsc{Pass}$_1$, and \textsc{Pass}$_{\text{all}}$. Based on \textsc{Pass}$_{\text{all}}$ performance, we identify GPT-5, Gemini-3-Pro, and Claude-Opus-4.5 as the top-performing models and proceed with cross-model verification among them.
+
+% \paragraph{Performance Gap.}
+% The results reveal a substantial performance gap between the top-performing and lower-performing models across all pipeline stages. In terms of syntactic correctness, GPT-5, Gemini-3-Pro, and Claude-Opus-4.5 significantly outperform GPT-4o, DeepSeek-V3.1, and Claude-Sonnet-3.7. Specifically, the top three models achieve syntax correctness rates of 67.1\% (110/164), 78.0\% (128/164), and 59.8\% (98/164), respectively, whereas the bottom three models reach only 14.6\% (24/164), 7.9\% (13/164), and 19.5\% (32/164). This disparity indicates that generating formally correct Rocq specifications remains a challenging task that demands strong reasoning capabilities.The gap persists in the \textsc{Pass}$_1$ and \textsc{Pass}$_{\text{all}}$ stages. Under self-verification, the bottom three models barely pass any specifications at these stages. These results confirm that both specification quality and proof synthesis capability vary substantially across models.
+
+% \paragraph{Cross-Model Verification.}
+% To investigate whether specification failures stem from inherent specification errors or from limitations in proof synthesis, we conduct cross-model verification experiments among the top three models. Notably, when stronger models are used to verify specifications generated by other models, pass rates can increase substantially. For instance, GPT-4o’s self-verification yields only one passing specification, whereas verification by Claude-Opus-4.5 increases this number to 22. This observation suggests that some models are capable of producing semantically valid specifications but struggle to synthesize corresponding proofs, underscoring the importance of decoupling specification quality from proof synthesis ability in \textsc{Coins}.
+
+% \paragraph{Self-Consistency Phenomenon.}
+% Among the top-performing models, we observe a mild but consistent self-consistency effect: models tend to perform slightly better when verifying their own generated specifications. Gemini-3-Pro achieves its highest pass rate (101/128) on self-generated specifications, and Claude-Opus-4.5 similarly peaks at 83/98 on its own outputs. However, this advantage remains limited, as cross-model verification among models with comparable capabilities yields similar results (e.g., Claude-Opus-4.5 verifying Gemini-3-Pro’s specifications achieves 96/128). This suggests that while a self-consistency bias exists, its impact is marginal when model capabilities are comparable.
+
+% \paragraph{Summary.}
+% Based on the two-phase evaluation, we identify Gemini-3-Pro as the strongest overall performer in both specification generation and proof synthesis. Consequently, we select Gemini-3-Pro as the primary proof engine for subsequent experiment RQ2 and adopt its generated specifications as the LLM specification baseline for comparison with human-written specifications.
+
+
+
+% \begin{table*}[t]
+% \centering
+% \caption{Evaluation results for LLM.}
+% \label{tab:cross-model-eval}
+% \vskip 0.15in
+
+% \begin{small}
+% \begin{tabular}{@{}llccccc@{}}
+% \toprule
+% \textbf{Gen Model} &
+% \textbf{Verify Model} &
+% \textbf{\textsc{Syntax}} (/164)$\uparrow$ &
+% \textbf{Pass$_1$} (/164)$\uparrow$ &
+% \textbf{Pass$_{\text{all}}$} (/164)$\uparrow$ &
+% \textbf{Fail$_{\text{all}}$} &
+% \textbf{Fixpoint} \\
+% \midrule
+
+% \multirow{4}{*}{GPT-4o}
+%  & GPT-4o          & 24  & 1   & 1   & -- & \multirow{4}{*}{0/24} \\
+%  & Gemini-3-Pro    & 24  & 20  & --  & -- & \\
+%  & GPT-5           & 24  & 18  & --  & -- & \\
+%  & Claude-Opus-4   & 24  & \textbf{22} & -- & -- & \\
+% \midrule
+
+% \multirow{4}{*}{DeepSeek-V3.1}
+%  & DeepSeek-V3.1   & 13  & 2   & 0   & -- & \multirow{4}{*}{1/13} \\
+%  & Gemini-3-Pro    & 13  & \textbf{7} & -- & -- & \\
+%  & GPT-5           & 13  & 6   & --  & -- & \\
+%  & Claude-Opus-4-5 & 13  & \textbf{7} & -- & -- & \\
+% \midrule
+
+% \multirow{4}{*}{Claude-Sonnet-3-7}
+%  & Claude-Sonnet-3-7 & 32 & 7   & 0   & -- & \multirow{4}{*}{4/32} \\
+%  & Gemini-3-Pro      & 32 & 25  & --  & -- & \\
+%  & GPT-5             & 32 & 23  & --  & -- & \\
+%  & Claude-Opus-4-5   & 32 & \textbf{26} & -- & -- & \\
+% \midrule
+
+% \multirow{3}{*}{GPT-5}
+%  & GPT-5           & 110 & 47  & 12  & -- & \multirow{3}{*}{44/110} \\
+%  & Gemini-3-Pro    & 110 & \textbf{84} & -- & -- & \\
+%  & Claude-Opus-4-5 & 110 & 81  & --  & -- & \\
+% \midrule
+
+
+% \multirow{3}{*}{Claude-Opus-4-5}
+%  & Claude-Opus-4-5 & 98  & \textbf{83} & 18 & -- & \multirow{3}{*}{43/98} \\
+%  & Gemini-3-Pro    & 98  & 76  & -- & -- & \\
+%  & GPT-5           & 98  & 60  & -- & -- & \\
+% \bottomrule
+
+% \multirow{3}{*}{Gemini-3-Pro}
+%  & Gemini-3-Pro    & 128 & \textbf{101} & 46 & 32 & \multirow{3}{*}{40/128} \\
+%  & GPT-5           & 128 & 79  & -- & -- & \\
+%  & Claude-Opus-4-5   & 128 & 96  & -- & -- & \\
+% \midrule
+
+% % \multirow{3}{*}{Manual}
+% %  & GPT-4o & 128 & \textbf{101} & 41 & -- & \multirow{3}{*}{40/128} \\
+% %  & DeepSeek-V3.1 & 128 & \textbf{101} & 41 & -- & \multirow{3}{*}{40/128} \\
+% %  & Gemini-3-Pro    & 128 & \textbf{101} & 41 & -- & \multirow{3}{*}{40/128} \\
+% %  & GPT-5           & 128 & 79  & -- & -- & \\
+% %  & Claude-Opus-4-5   & 128 & 96  & -- & -- & \\
+% % \midrule
+
+
+% \end{tabular}
+% \end{small}
+
+% \vskip -0.1in
+% \end{table*}
+
+
+
+% \subsection{RQ2: Human vs. LLM Specification Comparison}
+% We hypothesize that human-written specifications, being carefully crafted by domain experts, exhibit higher quality and are more amenable to proof synthesis than LLM-generated ones. To test this hypothesis, we design a two-phase experiment.
+
+% In the first phase, we evaluate all six models up to the \textsc{Pass}$_{\text{all}}$ stage using human-written specifications as the proof target. This isolates proof synthesis capability from specification quality, allowing us to verify whether the best-performing model identified in RQ1 maintains its advantage when operating on human-authored formalizations.
+
+% In the second phase, having confirmed the strongest model, we execute the complete \textsc{Coins} pipeline—including \textsc{Pass}$_{\text{all}}$, \textsc{Fail}$_{\text{all}}$, and isomorphism checking—on both human-written and LLM-generated specifications, with the strongest model serving as the proof engine. By comparing pass rates across all pipeline stages, we quantify the quality gap between human and machine-generated specifications. Furthermore, by analyzing cases where both specification sources pass acceptance and rejection filters yet fail isomorphism checking, we characterize systematic semantic divergences between human and LLM formalizations.
+
+% \paragraph{Evaluation Results and Analysis.}
+% TODO: Add experimental results and analysis here
+
+\subsection{RQ3: Why Is Specification Quality Difficult to Evaluate?}
+\input{chapters/rq3}
+
+% \paragraph{RQ4: The Syntax Barrier: Why do generated specifications fail to compile?}
+
+% While top-tier models achieve relatively high syntax compliance, a significant portion of generated specifications still fails to compile (as seen in the \textsc{Syntax} metric in Table~\ref{tab:generation}). This RQ investigates the nature of these failures: Are they mere typos, or do they reveal deeper misconceptions about the Rocq language?
+
+% We collected all 156 specifications that failed the \textsc{Syntax} stage across the top three models (Claude-Opus-4.5, Gemini-3-Pro, GPT-5). We performed a qualitative analysis on the error messages and the offending code, classifying the failures into three primary categories:
+% \begin{enumerate}
+%     \item \textbf{Type Mismatches:} Logical errors where the model confuses distinct Rocq types, most notably the distinction between \texttt{nat} (Peano numbers), \texttt{Z} (binary integers), and \texttt{R} (real numbers).
+%     \item \textbf{Missing Dependencies:} The model invokes functions or lemmas that are semantically valid but fail because the necessary module (e.g., \texttt{Ascii}, \texttt{ZArith}) was not imported.
+%     \item \textbf{Ill-formed Recursion:} \texttt{Fixpoint} definitions that fail Rocq's structural termination check (e.g., recursing on a value that is not strictly smaller).
+% \end{enumerate}
+
+% \paragraph{Results and Analysis.}
+% As shown in Table~\ref{tab:error-analysis}, we analyzed the distribution of errors across models. The results reveal three distinct failure patterns rooted in the tension between LLM training data and formal language strictness.
+
+% \begin{table}[h]
+% \centering
+% \caption{Breakdown of compilation errors by category. \textbf{Type Mismatches} are the dominant failure mode across all models (45\%), while \textbf{Missing Dependencies} disproportionately affect Claude-Opus.}
+% \label{tab:error-analysis}
+% \vskip 0.1in
+% \resizebox{\columnwidth}{!}{
+% \begin{tabular}{@{}lccccc@{}}
+% \toprule
+% \textbf{Model} & \textbf{Type Mismatch} & \textbf{Missing Dep.} & \textbf{Bad Recursion} & \textbf{Others} & \textbf{Total} \\
+% \midrule
+% Claude-Opus-4.5 & 24 & 19 & 12 & 11 & 66 \\
+% GPT-5           & 29 & 7 & 9 & 9 & 54 \\
+% Gemini-3-Pro    & 17 & 8 & 5 & 6 & \textbf{36} \\
+% \midrule
+% \textbf{Total}  & \textbf{70} (45\%) & 34 (22\%) & 26 (17\%) & 26 (17\%) & 156 \\
+% \bottomrule
+% \end{tabular}
+% }
+% \vskip -0.1in
+% \end{table}
+
+% \textbf{The Type Confusion Epidemic.} The most pervasive error, accounting for 45\% of all failures, is Type Mismatch. Models frequently attempt to use \texttt{nat} where \texttt{Z} is expected, or mix boolean functions with propositional logic. This suggests a strong "Language Bias": LLMs trained primarily on dynamically typed (Python) or unified-number-type languages treat "integer" as a generic concept. They lack the "muscle memory" for Rocq's strict constructive type system, where \texttt{nat} and \texttt{Z} are fundamentally different inductive structures requiring explicit casting (e.g., \texttt{Z.of\_nat}).
+
+% \textbf{Dependency Amnesia.} A failure mode distinct to Claude-Opus-4.5 is high Missing Dependency rates (19 cases). The model frequently generates code utilizing specific theories (e.g., \texttt{Ascii}) but fails to include the requisite \texttt{Require Import} statements. The error messages indicate that while the model semantically "knows" the library content, it forgets the syntactic boilerplate required to load it into the environment. In contrast, Gemini-3-Pro demonstrates significantly better context management.
+
+% \textbf{The Termination Barrier.} All models struggle with Ill-formed Recursive Definitions (17\% of errors). Rocq requires recursive functions to be structurally terminating. Models often generate Python-style recursion—such as recursing on \texttt{n / 10} for digit extraction—which is mathematically sound but rejected by Rocq's guard checker without an explicit well-founded measure. This highlights a critical gap between \emph{logical correctness} (the code terminates) and \emph{formal acceptance} (the prover is convinced it terminates).
+
+
+% \paragraph{RQ4: Impact of Specification Style: Operational vs. Relational}
+
+% Formal specifications for recursive programs can typically be expressed in two distinct styles: \textit{Operational} (using executable \texttt{Fixpoint} functions) or \textit{Relational} (using \texttt{Inductive} predicates). We hypothesize that LLMs exhibit significantly different proving capabilities across these styles due to the underlying verification mechanisms required.
+
+% \paragraph{Experimental Design.}
+% To rigorously test this hypothesis, we identified a subset of HumanEval problems involving complex recursion and manually constructed two semantically equivalent ground-truth specifications for each:
+% \begin{itemize}
+%     \item \textbf{Operational Version (Fixpoint):} Defines the intended behavior as a computable function. Verifying test cases against this version often reduces to symbolic execution (e.g., via Rocq's \texttt{simpl} or \texttt{reflexivity} tactics), relying heavily on the proof assistant's computational engine rather than the model's logical deduction.
+%     \item \textbf{Relational Version (Inductive):} Defines behavior via logical inference rules. Proofs in this setting cannot be discharged by mere computation; they require constructing explicit derivation trees (e.g., applying constructors like \texttt{apply} or \texttt{constructor}), thereby enforcing rigorous structural reasoning.
+% \end{itemize}
+
+% We evaluate the top-performing model (Gemini-3-Pro) on these paired specifications to quantify the "Reasoning Gap"—the decline in success rate when moving from computational verification to deductive verification.
+
+% \paragraph{Results and Analysis.}
+% \textcolor{red}{[TODO: Insert specific data here"]}
+
+% Preliminary observations suggest a stark contrast. For Operational specifications, the model frequently succeeds by invoking simplification tactics, effectively bypassing deep reasoning. However, when confronted with the Relational counterparts of the exact same problems, the model struggles to select the correct inductive constructors or manage intermediate proof states. This discrepancy suggests that current high pass rates on test-case verification may be partially inflated by the computational power of the Rocq engine, and that Relational specifications provide a more faithful metric of an LLM's true automated reasoning capability.
+
+% \paragraph{RQ5: Error Analysis and Data Structure Sensitivity}
+
+% While RQ1 and RQ2 focus on overall pass rates, this research question investigates the root causes of proof failures. specifically, we examine whether the model's proving capability is non-uniform across different data structures. We hypothesize that data types with complex internal representations in Rocq (e.g., \texttt{string}) induce higher failure rates compared to primitive mathematical types (e.g., \texttt{nat}, \texttt{bool}).
+
+% \paragraph{Experimental Design.}
+% We categorize the 164 HumanEval problems into three groups based on their primary input types:
+% \begin{enumerate}
+%     \item \textbf{Primitive (Numeric/Bool):} Problems involving only natural numbers, integers, or booleans.
+%     \item \textbf{List Structures:} Problems involving lists of primitives.
+%     \item \textbf{String Manipulation:} Problems involving string processing.
+% \end{enumerate}
+% We analyze the \textsc{Pass}$_{\text{all}}$ rates of the top-performing model across these categories and manually inspect the Rocq error messages for failed proofs to classify the failure modes (e.g., hallucinated library functions, incorrect induction hypotheses, or type mismatches).
+
+% \paragraph{Results and Analysis.}
+% \textcolor{red}{[TODO: Insert specific failure rate data"]}
+
+
+
+\subsection{RQ4: Rethinking Executability: Should Specifications Be Purely Relational?}
+\label{sec:rq4}
+
+\input{chapters/rq5}
+
+% When writing program specifications, handling inductive structures is inevitable. In imperative programming languages, this is typically achieved through loops or recursion. In Rocq, there are three primary approaches: (1) built-in higher-order inductive functions or predicates from Rocq's standard library, such as \texttt{strlen} and \texttt{fold}; (2) user-defined \texttt{Fixpoint} functions, which are custom recursive functions; and (3) user-defined \texttt{Inductive} predicates, which are inductively defined logical relations.
+
+% The key distinction between the latter two lies in their executability: \texttt{Fixpoint} definitions are computationally executable within Rocq, whereas \texttt{Inductive} predicates are purely logical relations without computational content. Importantly, these three approaches can be freely combined in practice. Consequently, whether a specification is ``executable'' is not a well-defined mathematical concept---a single specification may contain both executable and non-executable components.
+
+% Given this observation, the rigid requirement in CLEVER that all manual specifications must be non-executable appears overly restrictive and somewhat arbitrary. In this work, we focus specifically on the use of \texttt{Fixpoint} and provide two versions of our specification suite: one that permits \texttt{Fixpoint} definitions and one that prohibits them. This design enables us to investigate how the availability of \texttt{Fixpoint} constructs influences both the quality of generated specifications and the difficulty of proof automation.
+
+
+% \begin{table}[t]
+% \centering
+% \caption{Fixpoint usage in LLM-generated specifications.}
+% \label{tab:fixpoint-usage}
+% \vskip 0.15in
+% \begin{small}
+% \begin{tabular}{@{}lcc@{}}
+% \toprule
+% \textbf{Gen Model} &
+% \textbf{Fixpoint Usage} &
+% \textbf{Ratio (\%)} \\
+% \midrule
+% GPT-4o            & 0 / 24   & 0.0  \\
+% DeepSeek-V3.1     & 1 / 13   & 7.7  \\
+% Claude-Sonnet-3-7 & 4 / 32   & 12.5 \\
+% Gemini-3-Pro      & 40 / 128 & 31.3 \\
+% GPT-5             & 44 / 110 & 40.0 \\
+% Claude-Opus-4-5   & 43 / 98  & 43.9 \\
+% \bottomrule
+% \end{tabular}
+% \end{small}
+% \vskip -0.1in
+% \end{table}
+
+% Table~\ref{tab:fixpoint-usage} presents the frequency of \texttt{Fixpoint} usage across different models. We observe a clear divide: weaker models (GPT-4o, DeepSeek-V3.1, Claude-Sonnet-3-7) rarely employ \texttt{Fixpoint} constructs, while stronger models (Gemini-2.5-Pro, GPT-o3, Claude-Opus-4-5) utilize them more frequently. Notably, among the stronger models, the usage ratios remain relatively consistent (31--44\%), indicating that these models leverage \texttt{Fixpoint} to simplify complex specifications when appropriate, rather than overusing them indiscriminately.
+
+% Table~\ref{tab:fixpoint-usage} presents the frequency of \texttt{Fixpoint} usage across different models. We observe a clear divide: weaker models (GPT-4o, DeepSeek-V3.1, Claude-Sonnet-3-7) rarely employ \texttt{Fixpoint} constructs, while stronger models (Gemini-2.5-Pro, GPT-o3, Claude-Opus-4-5) utilize them more frequently. Notably, among the stronger models, the usage ratios remain relatively consistent (31--44\%), indicating that these models leverage \texttt{Fixpoint} to simplify complex specifications when appropriate, rather than overusing them indiscriminately.
+
+% This pattern suggests that \texttt{Fixpoint} plays a crucial role in effective specification design. To validate this hypothesis, we constructed two versions of our human-written specifications—one that permits \texttt{Fixpoint} definitions and one that prohibits them (relying solely on \texttt{Inductive} predicates). We then evaluated the top-performing model (Gemini-2.5-Pro) on both versions. As shown in Figure~X, proofs against non-\texttt{Fixpoint} specifications are substantially more difficult, with a notable drop in success rate. Moreover, specifications without \texttt{Fixpoint} require significantly more lines of code and exhibit considerably lower readability, as complex recursive logic must be manually unfolded into verbose relational rules.
+
+% \vspace{0.6em}
+% \begin{tcolorbox}[
+%   colback=gray!10,
+%   colframe=gray!60,
+%   boxrule=0.6pt,
+%   arc=2pt,
+%   left=6pt,
+%   right=6pt,
+%   top=6pt,
+%   bottom=6pt
+% ]
+% \small
+% \textbf{Finding 4:} Well-designed specifications inevitably require executable components. Encapsulating sub-logic within \texttt{Fixpoint} definitions effectively reduces both specification complexity and verification difficulty. Pure relational specifications, while theoretically elegant, lead to verbose, less readable code and unwieldy proof obligations that challenge even the strongest models.
+% \end{tcolorbox}
+% \vspace{0.6em}
+
+\section{Related Work}
+
+\paragraph{LLMs for Interactive Theorem Proving.}
+The integration of Large Language Models (LLMs) with Interactive Theorem Provers (ITPs) has rapidly evolved from local tactic prediction to the broader challenge of autoformalization. Early Rocq-side benchmarks such as CoqGym~\cite{yang2019learning} and Proverbot9001~\cite{sanchez2020generating} enabled supervised learning on large-scale proof traces to suggest individual proof steps. LeanDojo~\cite{yang2023leandojo} then pioneered retrieval-augmented generation for premise selection in Lean, while Baldur~\cite{first2023baldur} and Lemur~\cite{wu2024lemur} extended this line to whole-proof generation and repair within closed compiler-feedback loops. More recent efforts, including DeepSeek-Prover-v2~\cite{ren2025deepseek} and APOLLO~\cite{ospanov2026apollo}, introduce reinforcement learning and compiler-guided repair to further boost proving success rates, and NTP4VC~\cite{xu2026neural} extends neural theorem proving to industrial verification-condition proving. All of these works focus on finding proofs for \emph{given} specifications. Our work addresses the complementary problem of evaluating the quality of the specifications themselves. \textsc{Coins} is positioned as a diagnostic methodology for synthesized specifications, providing the evaluative foundation needed to interpret the artifacts produced by such autoformalization pipelines.
+
+\paragraph{Benchmarks for Verifiable Code Generation.}
+Research has increasingly shifted from evaluating functional correctness toward the formal verification of synthesized code, requiring models to generate implementations that satisfy formal contracts. Dafny-based benchmarks such as Clover~\cite{sun2024clover} and DafnyBench~\cite{loughridge2025dafnybench} evaluate models on generating verified implementations or auxiliary invariants. In the Lean~4 ecosystem, Clever~\cite{thakur2025clever} requires models to jointly generate specifications, implementations, and equivalence proofs against hidden ground truths. VeriBench~\cite{miranda2026veribench} evaluates end-to-end formal code verification in Lean~4, while its FTP variant focuses on theorem proving for code verification tasks.
+
+More recently, VERINA~\cite{ye2026verina} introduces a modular benchmark for code, specification, and proof generation, but its specification evaluation still primarily relies on ground-truth specifications as semantic references. VeriEquivBench~\cite{zeng2026veriequivbench} replaces ground-truth matching with a Dafny-verified equivalence score over $2{,}389$ algorithmic problems, but still requires proving equivalence between generated code and generated specifications; moreover, its reliance on Dafny's automated SMT-based backend limits the complexity of specifications that can be effectively checked. A further limitation of Lean-based benchmarks such as Clever and VERINA is that their final verified artifacts are Lean implementations and specifications, whereas industrial software is rarely implemented in Lean. In contrast, \textsc{Coins} pairs real-world Python implementations from HumanEval with Rocq specifications, and sidesteps full equivalence proofs by evaluating specifications on instantiated test cases. This test-case-based proving methodology disentangles the Evaluation Duality and provides a more discriminative assessment than binary verification outcomes.
+
+\paragraph{LLM-based Specification Synthesis.}
+The automated synthesis of formal properties from code has advanced from classical dynamic invariant detection (Daikon~\cite{Daikon}) to neuro-symbolic and iterative refinement approaches. AutoSpec~\cite{autospec} leverages LLMs and static analysis to decompose programs and refine generated specifications. Recent work has further explored LLM-assisted generation of contracts, loop invariants, and assertions: SpecGen~\cite{ma2025specgen}, Clause2Inv~\cite{cao2025clause2inv}, NeuroInv~\cite{king2025neurosymbolic}, SLD-Spec~\cite{chen2025sldspec}, and SESpec~\cite{yang2026integratingsymbolicexecutionllms}. Beyond generation, other works leverage LLMs to automate test-case construction for validating formal specifications in languages such as Alloy~\cite{cunha2025validating} or integrate property-based testing as a core engine for iterative code refinement~\cite{he2025pgs}. These works develop sophisticated generation and validation pipelines; \textsc{Coins} contributes a complementary systematic evaluation methodology to analyse the outputs of such systems, enabling an empirical investigation into how specification design choices---such as the Reasoning Gap between operational and relational styles---affect formal verifiability.
+
+\paragraph{Property-Based Testing and Mutation Analysis for Proof Assistants.}
+\textsc{Coins} is related to, but distinct from, property-based testing and mutation-analysis tools for proof assistants. The earliest such tool, QuickChick~\cite{paraskevopoulou2015foundational}, tests \emph{executable} properties against generated inputs; in contrast, \textsc{Coins} evaluates potentially non-executable logical specifications by constructing Rocq-checked proof obligations for trusted input-output behaviours. Subsequent Rocq-side mutation-analysis tools, mCoq~\cite{celik2019mutation} and MutantChick~\cite{cavada2020mutantchick}, mutate formal artifacts to assess proof-suite adequacy; our mutation step instead mutates Python implementations only, generating negative cases that measure whether a candidate specification is overly permissive.
+
+
+
+\section{Limitations and Future Work}
+Our current implementation is limited to Rocq specifications for the 164 HumanEval problems. It reflects the substantial cost of manually authoring formal specifications rather than a methodological constraint. The full experimental campaign spanned six frontier models, involving over 100{,}000 theorem-proving attempts, 620 mutants, and 123{,}981 positive test cases across the benchmark, where each proof attempt required multi-round LLM compiler interaction with Rocq's type checker. Scaling to other proof assistants or benchmarks demands comparable human annotation and computational effort, which we leave to future work.
+
+Importantly, the \textsc{Coins} methodology is not tied to Rocq or Python, and it applies wherever a test suite and a formal specification language are available. The evaluation pipeline can be readily extended to different implementation languages and proof assistants. In fact, it does not even require a reference implementation: only a natural-language requirement, a function signature, and user-provided positive and negative examples are needed to drive the entire evaluation process. We view \textsc{Coins} as a necessary first step toward our broader goal: fully automated C program verification within the CompCert ecosystem.
+
+\section{Conclusion}
+
+
+This study suggests that the apparent power of LLMs in program specification synthesis is inseparable from how specification quality is evaluated. The central challenge is therefore not only whether models can generate stronger or more expressive specifications, but whether our evaluation protocols can meaningfully observe and measure that strength. When evaluation is framed solely around whether an implementation satisfies a specification, specification quality itself becomes a latent variable, obscured by the difficulty of formal proof. Strong correctness criteria such as full semantic equivalence further exacerbate this issue by conflating specification quality with prover capability and proof complexity.
+
+Our findings highlight a fundamental asymmetry in formal reasoning: successful proofs constitute reliable positive evidence, while failed proofs are intrinsically ambiguous—they may stem from specification errors, prover limitations, or intractable proof obligations. Ignoring this asymmetry leads to systematic underestimation of model-generated specifications and masks genuine differences in model capability. In contrast, test-case--based formal reasoning provides a pragmatic middle ground, offering sound, interpretable evidence without resorting to brittle, all-or-nothing judgments.
+
+More broadly, this work argues that progress in LLM-based specification synthesis cannot be assessed solely by the ability to discharge equivalence proofs. Instead, future benchmarks should prioritize diagnostic evaluation signals that reflect what contemporary formal tools can establish reliably. By reframing evaluation around provable behavioral evidence, we aim to provide a more faithful answer to how powerful LLMs truly are in generating program specifications, and to enable more principled progress in neural program verification.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% \textbf{Results and Analysis.} Table~\ref{tab:cross-model-eval} presents the cross-model evaluation results for specification generation and verification. We evaluate six state-of-the-art LLMs across the complete pipeline: generating Rocq specifications and subsequently verifying them with different models.
+
+% \textbf{Performance Gap.} A striking observation emerges from the results: there exists a significant performance gap between the top-tier and lower-tier models. GPT-5, Gemini-3-Pro, and Claude-Opus-4-5 substantially outperform GPT-4o, DeepSeek-V3.1, and Claude-Sonnet-3-7 in specification generation. Specifically, the top three models achieve syntax correctness rates of 67.1\%, 78.0\%, and 59.8\% respectively, while the bottom three models only reach 14.6\%, 7.9\%, and 19.5\%. This disparity suggests that generating formally correct Rocq specifications remains a challenging task that requires frontier-level model capabilities.
+
+% \textbf{Cross-Model Verification.} To investigate whether specifications are inherently difficult or model-specific, we conduct cross-model verification experiments. Interestingly, when stronger models (Gemini-3-Pro, GPT-5, Claude-Opus-4-5) verify specifications generated by weaker models, the pass rates improve dramatically. For instance, GPT-4o's self-verification yields only 1 passing specification, whereas verification by Claude-Opus-4-5 increases this to 22. This indicates that weaker models can generate semantically valid specifications but struggle to prove them. 
+
+% Based on our extensive cross-model verification, we select the highest-performing model, Gemini-3-Pro, as our primary verification engine for all subsequent experiments. Furthermore, the specifications generated by Gemini-3-Pro are established as the LLM specification baseline.
+
+% \textbf{Self-Consistency Phenomenon.} Among the top-tier models, we observe a subtle but consistent self-consistency effect: models tend to perform slightly better when verifying their own generated specifications. Gemini-3-Pro achieves its highest pass rate (101/128) on self-generated specs, and Claude-Opus-4-5 similarly peaks at 83/98 on its own outputs. However, this advantage is not pronounced---cross-model verification with comparable models yields similar results (e.g., Claude-Opus-4-5 verifying Gemini-3-Pro's specs achieves 96/128). This suggests that when model capabilities are comparable, the self-consistency bias exists but remains marginal.
+
+
+
+% \textbf{Fixpoint Usage.} The rightmost column reveals an interesting trend in specification style: stronger models employ \texttt{Fixpoint} definitions more frequently (31\%--44\%) compared to weaker models (0\%--13\%). This may indicate that advanced models are more comfortable with recursive specifications, and that \texttt{Fixpoint}-based specifications are inherently more amenable to automated verification.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% \section*{Accessibility}
+
+% Authors are kindly asked to make their submissions as accessible as possible
+% for everyone including people with disabilities and sensory or neurological
+% differences. Tips of how to achieve this and what to pay attention to will be
+% provided on the conference website \url{http://icml.cc/}.
+
+\section*{Software and Data}
+
+We make our implementation and datasets publicly available at \url{https://github.com/taylor-swift-13/Coins_ICML_2026}.
+
+
+% Acknowledgements should only appear in the accepted version.
+\section*{Acknowledgements}
+
+This work has been partially funded by the National Natural Science Foundation of China under grant No.~62192732, No.~62432005, W2511064, No.~62572459 and No.~62502475, the CAS Project for Young Scientists in Basic Research under Grant No. YSBR-123, and the ISCAS Basic Research under Grant No. ISCAS-JCZD-202406.
+
+\section*{Impact Statement}
+
+% Authors are \textbf{required} to include a statement of the potential broader
+% impact of their work, including its ethical aspects and future societal
+% consequences. This statement should be in an unnumbered section at the end of
+% the paper (co-located with Acknowledgements -- the two may appear in either
+% order, but both must be before References), and does not count toward the paper
+% page limit. In many cases, where the ethical impacts and expected societal
+% implications are those that are well established when advancing the field of
+% Machine Learning, substantial discussion is not required, and a simple
+% statement such as the following will suffice:
+
+This paper presents work whose goal is to advance the field of Machine
+Learning. There are many potential societal consequences of our work, none
+that we feel must be specifically highlighted here.
+
+% The above statement can be used verbatim in such cases, but we encourage
+% authors to think about whether there is content which does warrant further
+% discussion, as this statement will be apparent if the paper is later flagged
+% for ethics review.
+
+% In the unusual situation where you want a paper to appear in the
+% references without citing it in the main text, use \nocite
+
+\bibliography{example_paper}
+\bibliographystyle{icml2026}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% APPENDIX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\appendix
+\onecolumn
+% \section{You \emph{can} have an appendix here.}
+\input{chapters/nega}
+\input{chapters/formal}
+\input{chapters/config}
+\input{chapters/sat}
+\section{RQ5: How Do LLM-Generated Specifications Compare to Human-Written Ones?}
+\label{appendix:human-llm}
+\input{chapters/rq4}
+\input{chapters/rq6}
+\input{chapters/rq7}
+\input{chapters/rq8}
+\input{chapters/rq9}
+\input{chapters/rq10}
+
+
+
+% You can have as much text here as you want. The main body must be at most $8$
+% pages long. For the final version, one more page can be added. If you want, you
+% can use an appendix like this one.
+
+% The $\mathtt{\backslash onecolumn}$ command above can be kept in place if you
+% prefer a one-column appendix, or can be removed if you prefer a two-column
+% appendix.  Apart from this possible change, the style (font size, spacing,
+% margins, page numbering, etc.) should be kept the same as the main body.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
+% This document was modified from the file originally made available by
+% Pat Langley and Andrea Danyluk for ICML-2K. This version was created
+% by Iain Murray in 2018, and modified by Alexandre Bouchard in
+% 2019 and 2021 and by Csaba Szepesvari, Gang Niu and Sivan Sabato in 2022.
+% Modified again in 2023 and 2024 by Sivan Sabato and Jonathan Scarlett.
+% Previous contributors include Dan Roy, Lise Getoor and Tobias
+% Scheffer, which was slightly modified from the 2010 version by
+% Thorsten Joachims & Johannes Fuernkranz, slightly modified from the
+% 2009 version by Kiri Wagstaff and Sam Roweis's 2008 version, which is
+% slightly modified from Prasad Tadepalli's 2007 version which is a
+% lightly changed version of the previous year's version by Andrew
+% Moore, which was in turn edited from those of Kristian Kersting and
+% Codrina Lauth. Alex Smola contributed to the algorithmic style files.

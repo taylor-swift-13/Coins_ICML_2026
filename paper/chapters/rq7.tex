@@ -1,0 +1,112 @@
+\section{RQ7: What Are the Principal Barriers to Syntactic Correctness in Rocq?}
+\label{appendix:rq7}
+
+While state-of-the-art models achieve relatively high syntax compliance, a non-negligible fraction of generated specifications still fails to compile (as reflected in the \textsc{Syntax} metric in Table~\ref{tab:generation}). To understand the root causes, we conducted a qualitative analysis of all 156 specifications that failed the \textsc{Syntax} stage across the top three performing models: Claude 4.5 Opus, GPT-5, and Gemini 3 Pro Preview. We classified the errors into three primary categories:
+
+\begin{itemize}
+    \item \textbf{Type Mismatches (45\%):} Logical errors where the model conflates distinct Rocq types, such as Peano natural numbers (\texttt{nat}), binary integers (\texttt{Z}), and propositions (\texttt{Prop}).
+    \item \textbf{Missing Dependencies (22\%):} Cases where the model invokes semantically appropriate functions (e.g., from \texttt{Ascii} or \texttt{ZArith}) but fails to include necessary \texttt{Require Import} statements.
+    \item \textbf{Ill-formed Recursion (17\%):} \texttt{Fixpoint} definitions that violate the \textit{Calculus of Inductive Constructions}' strict structural termination requirements, often by recursing on non-syntactic sub-terms.
+\end{itemize}
+
+\paragraph{Error Distribution and Analysis.}
+Table~\ref{tab:error-analysis} summarizes the error distribution. These failures reflect a fundamental tension between the probabilistic nature of LLMs and the rigid logical kernels of proof assistants.
+
+\begin{table}[h]
+\centering
+\caption{Breakdown of compilation errors (N=156) by category.}
+\label{tab:error-analysis}
+\vskip 0.1in
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Model} & \textbf{Type Mismatch} & \textbf{Missing Dep.} & \textbf{Bad Recursion} & \textbf{Others} & \textbf{Total} \\
+\midrule
+Claude 4.5 Opus & 24 & 19 & 12 & 11 & 66 \\
+GPT-5           & 29 & 7  & 9  & 9  & 54 \\
+Gemini 3 Pro Preview   & 17 & 8  & 5  & 6  & \textbf{36} \\
+\midrule
+\textbf{Total}  & \textbf{70} (45\%) & \textbf{34} (22\%) & \textbf{26} (17\%) & \textbf{26} (17\%) & 156 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Type System Rigidity vs. Language Bias.}
+Type Mismatches remain the dominant failure. Models frequently treat \texttt{nat} and \texttt{Z} interchangeably, likely an artifact of pre-training on dynamically typed languages like Python. Unlike those languages, Rocq requires explicit casting (e.g., \texttt{Z.of\_nat}) due to the fundamentally different inductive structures of these types.
+
+\textbf{Context Management and Imports.}
+Claude 4.5 Opus exhibited a notably higher rate of Missing Dependencies (19 cases). This suggests a "knowledge-action gap": the model understands the semantic need for a library function but neglects the syntactic boilerplate required to make it available in the current environment. Gemini 3 Pro Preview demonstrated more robust context awareness in this regard.
+
+\textbf{The Structural Termination Gap.}
+All models struggle with Ill-formed Recursive Definitions (17\% of errors). Rocq's guard checker requires recursive functions to be structurally terminating, meaning recursive calls must be performed on direct syntactic sub-terms of the inductive input. We observed that models often generate ``Pythonic'' recursion patterns that are mathematically sound but formally rejected. 
+
+In this section, we provide a concrete example of the \textbf{Ill-formed Recursion} failure mode, which accounts for approximately 17\% of compilation errors. Figure~\ref{fig:bad_recursion_case} illustrates a case where the model attempts to generate a specification for a sequence similar to Fibonacci (specifically, the \texttt{fib4} sequence).
+
+\begin{figure}[h]
+    \centering
+    % colback=blue!3!white : 极淡的蓝色背景
+    % colframe=blue!60!black : 深蓝色边框
+    \begin{tcolorbox}[
+        enhanced,
+        title=\textbf{Case Study: Ill-formed Recursion in \texttt{fib4\_seq}},
+        fonttitle=\bfseries\small,
+        colback=blue!3!white,   
+        colframe=blue!50!black,    
+        boxrule=0.8pt,
+        arc=2pt,
+        breakable
+    ]
+    
+    % --- 1. The Generated Code ---
+    \textbf{Generated Specification:}
+    \begin{lstlisting}[
+        language=Coq, 
+        frame=single, 
+        framerule=0pt,             
+        backgroundcolor=\color{white}, 
+        basicstyle=\ttfamily\small
+    ]
+Require Import Coq.ZArith.ZArith.
+Require Import Coq.Arith.PeanoNat.
+
+Open Scope Z_scope.
+
+Fixpoint fib4_seq (n : nat) : Z :=
+  match n with
+  | 0%nat => 0
+  | 1%nat => 0
+  | 2%nat => 2
+  | 3%nat => 0
+  | S (S (S (S m))) => fib4_seq (S (S (S m))) + fib4_seq (S (S m)) + 
+                       fib4_seq (S m) + fib4_seq m
+  end.
+
+Definition fib4_spec (n : Z) (res : Z) : Prop :=
+  n >= 0 /\ res = fib4_seq (Z.to_nat n).
+    \end{lstlisting}
+
+    \vspace{0.2cm}
+    
+    % --- 2. The Compiler Error ---
+    \textbf{Rocq Compiler Error:}
+    \begin{tcolorbox}[
+        colback=red!5!white,
+        colframe=red!75!black,
+        left=2pt, right=2pt, top=2pt, bottom=2pt,
+        arc=0mm, boxrule=0.5pt,
+        title=Compiler Output,
+        fonttitle=\bfseries\scriptsize,
+        coltitle=white
+    ]
+    \footnotesize\ttfamily\color{red!40!black}
+    Recursive definition of fib4\_seq is ill-formed.\\
+    In environment\\
+    fib4\_seq : nat -> Z\\
+    ...\\
+    Recursive call to fib4\_seq has principal argument equal to "S m" instead of one of the following variables: "n0" "n1" "n2" "m".
+    \end{tcolorbox}
+    
+    \end{tcolorbox}
+    
+    \caption{\textbf{Example of Ill-formed Recursion.} The model attempts to implement a recurrence relation $f(n) = \sum_{i=1}^{4} f(n-i)$ but fails Rocq's structural termination check. Rocq requires recursive arguments to be strict subterms of the matched pattern (e.g., \texttt{m}), but the model passes \texttt{S m} (conceptually $n-3$), which Rocq cannot automatically verify as terminating without additional measures.}
+    \label{fig:bad_recursion_case}
+\end{figure}

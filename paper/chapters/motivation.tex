@@ -1,0 +1,97 @@
+\label{sec:motivation}
+
+We first clarify what we mean by a \emph{formal program specification}
+and why evaluating it differs from evaluating implementations.
+
+Consider the \texttt{sort\_third} problem from HumanEval:
+given a list, return a modified list in which elements at indices
+divisible by three are sorted, while all other elements remain
+in their original positions.
+Correct implementations may use different algorithms, data structures,
+or iteration styles.
+
+A specification abstracts away all such details.
+It is a logical proposition (\texttt{Prop}) over \emph{only} the input
+and output, capturing the relationship any correct implementation must satisfy.
+It should be independent of any particular implementation
+and admit no over-approximation on the input--output relation.
+
+% Concretely, the specifications we consider consist of two parts:
+% a \emph{precondition} characterizing properties that the input must satisfy,
+% and a \emph{postcondition} characterizing the relation that the input and the
+% output must jointly satisfy.
+% By design, such specifications are agnostic to both the implementation
+% language and the implementation itself: they make no statement about,
+% for instance, whether a particular concrete program triggers a runtime
+% exception on a given input, nor about memory layout, stack usage,
+% or other operational artifacts.
+% We acknowledge that for some languages, properties of this kind may
+% legitimately be part of a specification---a C-level contract, for example,
+% may need to reason about memory.
+% Such language-specific specifications, however, lie outside the scope of
+% this work, which focuses on language- and implementation-agnostic
+% specifications of functional behaviour.
+
+Concretely, the specifications we consider consist of two parts: a \emph{precondition} characterizing properties the input must satisfy, and a \emph{postcondition} characterizing the relation the input and output must jointly satisfy. By design, such specifications are agnostic to both the implementation language and the implementation itself, making no statement about runtime exceptions, memory layout, or other operational artifacts. While such properties may legitimately belong in language-specific specifications (e.g., a C-level memory contract), these lie outside the scope of this work, which targets language- and implementation-agnostic specifications of functional behaviour.
+
+For \texttt{sort\_third}, this can be written in Rocq as:
+
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+Definition sort_third_spec
+  (input output : list Z) : Prop :=
+  Permutation input output /\
+  (forall (i : nat),
+    (i < length input)%nat ->
+    (i mod 3 <> 0) ->
+    nth i output 0%Z = nth i input 0%Z) /\
+  (forall (i j : nat),
+    i < length output /\
+    j < length output /\
+    i mod 3 = 0 /\
+    j mod 3 = 0 /\
+    i < j ->
+    (nth i output 0 <= nth j output 0)%Z).
+\end{lstlisting}
+
+\noindent
+This specification states three conditions:
+the output is a permutation of the input,
+non-divisible-by-three positions are preserved,
+and divisible-by-three positions are sorted in non-decreasing order.
+Any correct implementation satisfies this specification,
+and any incorrect one violates at least one condition.
+
+\noindent
+This differs from program translation: mechanically translating Python into
+Rocq would encode algorithm-specific details and remain tied to one
+implementation. A specification, by contrast, captures only what the user
+cares about---for algorithmic problems, functional correctness rather than
+\emph{how} the result was computed.
+
+Under this definition, a specification is not a problem with a single
+canonical answer. For functional correctness, test cases provide the most
+natural formalization of user concerns: positive cases encode accepted
+behaviors and negative cases encode rejected ones, and proving on concrete
+test cases is substantially easier than proving full semantic equivalence,
+allowing us to isolate specification quality from prover capability.
+
+This observation directly motivates \textsc{Coins}, which evaluates a
+specification by instantiating it on concrete test cases and checking
+whether the resulting proof obligations can be discharged. For the positive
+test case \lstinline|([2;1;3;7;8;9;10], [2;1;3;7;8;9;10])|, \textsc{Coins}
+asks the LLM to prove:
+
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+Example sort_third_pos :
+  sort_third_spec [2;1;3;7;8;9;10]
+                  [2;1;3;7;8;9;10].
+Proof. unfold sort_third_spec. ... Qed.
+\end{lstlisting}
+
+\noindent
+For a mutated negative case such as
+\lstinline|([2;1;3;7;8;9;10], [7;1;3;2;8;9;10])|, the specification should
+\emph{not} be provable; if the LLM constructs a proof, the specification is
+overly permissive and fails. The object evaluated is always the
+specification itself, not the implementation. We describe the full
+evaluation pipeline below.

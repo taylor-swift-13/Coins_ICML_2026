@@ -1,0 +1,198 @@
+\section{Experimental Configuration Details}
+\label{appendix:config}
+
+\subsection{Model Configuration}
+
+Table~\ref{tab:model-config} summarizes the model versions and API identifiers used in our experiments,
+together with their default reasoning configurations as provided by the respective platforms.
+Unless otherwise specified, we use the default inference settings recommended by each provider. 
+
+For specification generation, we set the temperature to 0 to ensure deterministic and reproducible outputs. For proof generation, we set the temperature to 0.7 to balance precision with exploratory diversity, as the task involves multiple rounds of Rocq feedback and revision.
+
+
+\subsection{Prompt Design}
+
+Our prompt design follows a deliberately minimalistic principle.
+Rather than providing detailed heuristics, step-by-step guidance, or domain-specific proof strategies, we restrict prompts to essential task descriptions and formatting constraints.
+This design avoids injecting redundant or overly prescriptive instructions, allowing models to independently determine what constitutes a suitable specification and a valid proof.
+
+By minimizing prompt-level guidance, we aim to evaluate the models’ intrinsic ability to synthesize high-quality specifications and construct correct proofs, rather than their capacity to follow handcrafted prompting strategies.
+All prompts used in the experiments are reported below:
+
+\clearpage
+\begin{table}[t]
+\centering
+\caption{Model configurations used in our experiments.}
+\label{tab:model-config}
+\resizebox{0.7 \linewidth}{!}{%
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Model} & \textbf{API Identifier} & \textbf{Default Reasoning} \\
+\midrule
+Gemini 3 Pro Preview & \texttt{gemini-3-pro-preview} & High \\
+Claude 3.7 Sonnet & \texttt{claude-3-7-sonnet-20250219} & Non-reasoning \\
+Claude 4.5 Opus & \texttt{claude-opus-4-5-20251101} & Non-reasoning \\
+GPT-4o & \texttt{gpt-4o} & -- \\
+GPT-5 & \texttt{gpt-5} & Medium \\
+DeepSeek V3.1 & \texttt{deepseek-v3.1} & Non-reasoning \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+
+\begin{promptbox}{Specification Generation Prompt}
+\begin{verbatim}
+You are an expert in writing Rocq specifications.
+Below is a textual description of a program and its corresponding Python code.
+Your task is to generate a precise and complete Rocq specification 
+for this program based on the provided information.
+Rules
+- Including the Require Import statements.
+- Do not generate any natural language comments.
+
+Before generating the output, please refer to the following example:
+[Example]
+    [Input]
+        Now, this is the description: 
+
+        def add(A: int, B: int):
+            """
+            return the sum of A and B.
+            """
+        ,
+        and this is the code: 
+
+            return A + B
+        .
+    [Output]
+        ```coq
+        Definition add_spec (A : int) (B : int) (sum : int) : Prop :=
+        sum = A + B.
+        ```
+
+Now, this is the description: {input_text},
+and this is the code: {code}.
+Please output only the Rocq specification for this program.
+\end{verbatim}
+\end{promptbox}
+
+\clearpage
+\begin{promptbox}{\textsc{Pass}$_{\text{first}}$ Prompt}
+\begin{verbatim}
+Please generate a complete Rocq proof for the following specification and test
+case.
+Specification definition:
+{spec_content}
+Test case:
+{example}
+Please generate an Example proof, including the full Proof steps and ending 
+with Qed. If additional imports or lemmas are required, please also provide 
+them.
+
+Notes:
+1. Use appropriate Rocq tactics (such as unfold, simpl, reflexivity etc.)
+2. Ensure the proof is complete and correct
+3. If real number operations are involved, please use R_scope
+4. If integer operations are involved, please use Z_scope
+5. For list operations, please use the appropriate List library functions
+
+Please return Rocq code directly, without any additional explanations.
+\end{verbatim}
+\end{promptbox}
+
+\begin{promptbox}{\textsc{Pass}$_{\text{all}}$ Prompt}
+\begin{verbatim}
+You are given the full content of an existing Rocq output file for a HumanEval 
+spec. It already includes the specification definitions and the proof for the 
+first test case.
+
+Existing Rocq output file content
+specification for the first test case `{first_test_case}`:
+```coq
+{existing_output_content}
+```
+Now, generate a Rocq Example proof for the following new test case {test_case} 
+and replace the first test case:
+
+Requirements:
+
+Return the full content of the Rocq output file for the new test case.
+
+Do NOT add any natural language comments.
+
+End with Qed.
+\end{verbatim}
+\end{promptbox}
+
+\clearpage
+\begin{promptbox}{\textsc{Rejected}$_{\text{all}}$ Prompt}
+\begin{verbatim}
+Please generate a complete Rocq proof for the following specification and test
+case.
+
+Specification definition:
+{spec_content}
+
+Test case:
+{example}
+
+First, judge whether you can generate a valid proof for the given spec and 
+test case.
+- If YES: Generate the complete Example proof (Proof steps + Qed), with any 
+necessary imports or lemmas.
+- If NO: Return only "Test case is not accepted".
+
+Do NOT modify the given spec or test case.
+
+Notes:
+1. Use appropriate Rocq tactics (such as unfold, simpl, reflexivity etc.)
+2. Ensure the proof is complete and correct
+3. If real number operations are involved, please use R_scope
+4. If integer operations are involved, please use Z_scope
+5. For list operations, please use the appropriate List library functions
+
+Please return Rocq code directly, without any additional explanations.
+\end{verbatim}
+\end{promptbox}
+
+
+\begin{promptbox}{Equivalence Prompt}
+\begin{verbatim}
+You are a Rocq proof assistant. Given two Rocq specifications, your task is to 
+generate a COMPLETE, STANDALONE Rocq file that proves the first specification 
+logically implies the second specification.
+
+First specification ({spec1_name}):
+```coq
+{spec1}
+```
+Second specification ({spec2_name}):
+```coq
+{spec2}
+```
+Your task is to generate a COMPLETE Rocq file that:
+Includes ALL necessary Require Import statements from both specifications
+Includes ALL definitions from the first specification
+Includes ALL definitions from the second specification
+States a theorem that expresses the implication relationship
+Provides a complete proof using appropriate Rocq tactics
+Is syntactically correct and can be verified by Rocq independently
+Rules:
+
+The generated code must be a COMPLETE, STANDALONE Rocq file
+
+Generate ONLY Rocq code, without any explanations
+\end{verbatim}
+\end{promptbox}
+
+
+\begin{promptbox}{Error Feedback Prompt}
+\begin{verbatim}
+IMPORTANT: The previous proof attempt failed with the following error:
+{error_info}
+
+Please fix the proof based on this error information and generate a corrected 
+version.
+\end{verbatim}
+\end{promptbox}

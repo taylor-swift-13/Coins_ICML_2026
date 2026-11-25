@@ -1,0 +1,124 @@
+
+\label{sec:framework}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.48\textwidth]{images/flow.pdf}
+    \caption{\textbf{The \textsc{Coins} evaluation framework.} (a) Preparation: inputs from HumanEval and generated specifications. (b) Evaluation: multi-stage filtering pipeline. Annotated numbers show filtering results for Gemini 3 Pro Preview (164 $\rightarrow$ 46 candidates).}
+    \label{fig:framework}
+\end{figure}
+
+
+
+% To evaluate Rocq specifications on HumanEval, we instantiate each specification with concrete input-output values from the test cases and discharge the induced verification obligations. A specification is deemed to accept a test case if and  only if the corresponding verification obligation can be successfully constructed and verified by the Rocq proof assistant. Since this test-case-based \textbf{Co}q proof goal \textbf{ins}tantiation forms the core of our methodology, we call our framework \textsc{Coins}.
+
+% Figure~\ref{fig:framework} illustrates our evaluation pipeline, organized into two phases. In the \textbf{Preparation Phase} (Figure~\ref{fig:framework}a), we manually craft ground-truth Rocq specifications for HumanEval problems, prompt LLMs to produce specifications following the same signature, and generate counter cases through mutation testing to supplement the original positive test cases. In the \textbf{Evaluation Phase} (Figure~\ref{fig:framework}b), we progressively filter specifications through a multi-stage pipeline—syntactic validation, positive test acceptance, counter case rejection, and equivalence verification—by constructing acceptance proofs at each stage.
+
+To evaluate program specifications written in Rocq, we instantiate each specification with concrete input-output values from the test cases and discharge the induced verification obligations. A specification is deemed to accept a test case if and only if the corresponding verification obligation can be successfully constructed and verified by the Rocq proof assistant. We demonstrate our approach using the HumanEval benchmark.
+
+Figure~\ref{fig:framework} illustrates our evaluation pipeline, organized into two phases. In the \textbf{Preparation Phase} (Figure~\ref{fig:framework}a), we manually craft reference Rocq specifications for HumanEval problems, prompt LLMs to produce specifications following the same signature, and generate negative cases through mutation testing to supplement the original positive test cases. In the \textbf{Evaluation Phase} (Figure~\ref{fig:framework}b), we progressively filter specifications through a multi-stage pipeline—syntactic validation, positive test acceptance, negative-case rejection, and equivalence verification—by constructing acceptance proofs at each stage.
+
+\subsection{Preparation Phase}
+
+The preparation phase establishes the evaluation infrastructure through three key components: (1) human specifications that serve as the ground-truth, (2) LLM prompts for eliciting LLM-generated specifications, and (3) test suites combining both positive and negative cases to assess specification behavior. 
+
+
+\textbf{Human Specifications.}
+We manually constructed ground-truth Rocq specifications for all 164 problems in the HumanEval dataset. Each specification takes the form of a \texttt{Prop} that defines a logical predicate over input and output, following a unified signature. To ensure semantic correctness, each specification underwent rigorous review by experts in formal verification. These human-authored specifications serve as a critical baseline in our framework.
+
+\textbf{LLM Prompting Strategy.}
+We design prompts that provide LLMs with the natural language description and reference implementation from each HumanEval problem, along with explicit instructions to generate Rocq specifications adhering to the same unified signature as our reference specifications. This signature constraint ensures structural consistency between LLM-generated and human-authored specifications, enabling direct comparison in subsequent evaluation stages. The actual specification generation occurs in the evaluation phase, where we query multiple LLMs using these prepared prompts.
+
+\textbf{Test Suite Construction.}
+To evaluate specification behavior, we construct a dual test suite comprising both positive and negative test cases, providing complementary coverage of correct and incorrect program behaviors.
+
+\textit{Positive Test Cases.} 
+ We leverage positive test cases directly from the HumanEval+ benchmark, which augments each HumanEval problem with extensive automatically-generated input-output pairs, averaging 755.98 positive test cases per problem. These cases represent intended program behaviors and provide broad coverage of the specification's acceptance criteria.
+
+% \textit{Negative Test Cases.} 
+% \label{sec:neg-cases}
+% To detect overly permissive specifications that may accept incorrect behaviors, we automatically generate negative test cases through systematic mutation testing. Specifically, we apply operator-level mutations---including arithmetic, relational, and logical transformations---to the canonical HumanEval implementations. An input-output pair is collected as a negative case if a mutant produces output diverging from the ground-truth implementation. This process yields 10 negative test cases per problem, totaling 1,640 negative cases across the 164 HumanEval tasks, enabling precise assessment of specification restrictiveness.
+
+\textit{Negative Test Cases.}
+\label{sec:neg-cases}
+To identify overly permissive specifications, we generate negative test cases via mutation testing on the canonical HumanEval implementations. We apply operator-level mutations and collect an input-output pair as a negative case whenever a mutant’s output diverges from the ground-truth behavior. This procedure produces 10 negative test cases per problem, for a total of 1{,}640 negative cases across all 164 HumanEval tasks. Detailed mutation operators and generation procedures are provided in the Appendix~\ref{appendix:nega}.
+
+% \textbf{Human Specifications.} We manually constructed ground-truth Rocq specifications for all 164 problems in the HumanEval dataset. Each specification takes the form of a \texttt{Prop} that defines a logical predicate over input and output, following a unified signature. To ensure semantic correctness, each specification underwent rigorous review by experts in formal verification. These human-authored specifications serve a critical baseline in our framework.
+
+% \textbf{LLM Specifications.} We provide LLMs with the natural language description and implementation code from each HumanEval problem, requiring them to generate Rocq specifications that \emph{align with the same unified signature} as our human-written ones. This signature constraint ensures consistency between LLM-generated and human-written specifications, enabling direct comparison and equivalence verification.
+
+% \paragraph{Counter Cases}
+% \label{sec:counter-cases}
+% To detect overly permissive specifications, we supplement positive test cases with automatically generated counter cases via mutation testing. Specifically, we apply operator mutations (arithmetic, relational, and logical) to the canonical 
+% HumanEval implementations. An input-output pair is collected as a counter case if a mutant produces an output divergent from the ground truth. This process yields 10 negative test cases per problem, totaling 1,640 counter cases across the 164 HumanEval tasks.
+
+
+
+% \textbf{Positive Test Cases.}
+% To evaluate specification behavior on observed executions, we consider positive test cases directly drawn from the HumanEval+ benchmark, which augments each HumanEval problem with an extensive suite of automatically generated input/output tests. These test cases are treated as positive examples of intended program behavior. On average, each specification is evaluated against several thousand positive test cases per problem, providing broad coverage of observed behaviors.
+
+% \textbf{Negative Test Cases.}
+% \label{sec:neg-cases}
+% To detect overly permissive specifications, we further supplement positive cases with automatically generated negative cases via mutation testing.
+% Specifically, we apply operator-level mutations, including arithmetic, relational, and logical mutations, to the canonical HumanEval implementations.
+% An input/output pair is collected as a negative case if a mutant produces an output that diverges from the ground truth implementation.
+% This process yields 10 negative test cases per problem, totaling 1{,}640 negative cases across the 164 HumanEval tasks.
+
+
+
+\subsection{Evaluation Phase}
+
+In the evaluation phase, we first prompt LLMs to generate Rocq specifications using the prepared prompts from the preparation phase. The generated specifications then undergo a multi-stage filtering pipeline (Figure~\ref{fig:framework}b), where each stage incrementally accumulates evidence about specification correctness and precision. The detailed design principles of this pipeline, along with an analysis of each stage, are provided in Appendix~\ref{appendix:theory}.
+
+\textbf{Syntactic Validation (\textsc{Syntax}).}
+We first check whether each generated specification is syntactically well-formed and successfully compiled in Rocq. Specifications that fail this stage are discarded without further semantic evaluation.
+
+\textbf{First-Case  Acceptance (\textsc{Pass}$_{\text{first}}$).} For syntactically valid specifications, we attempt to discharge the proof obligation corresponding to the first positive test case. This early filtering step reduces computational overhead in later stages.
+
+\textbf{Full Positive Test Acceptance (\textsc{Pass}$_{\text{all}}$).}
+Specifications that pass the first case are evaluated against all positive test cases. We reuse the proof constructed for the first case as a reference, as successful proofs often share structural patterns across test instances. Failure to discharge some test obligations is treated as \emph{inconclusive}, as it may arise either from an incorrect specification or from limitations in automated proof synthesis.
+
+
+
+
+
+% \paragraph{Counterexample Rejection (\textsc{Reject}$_{\text{all}}$).}
+% Accepting all positive test cases alone is insufficient to rule out overly permissive specifications. 
+% We therefore evaluate candidate specifications against automatically generated negative cases by attempting to prove that each negative case is rejected. 
+% Using the same proof-based criterion, a specification is considered \emph{precise} with respect to the negative-case set if all rejection proofs succeed; otherwise, the result is marked as \emph{inconclusive}. 
+% Ultimately, a specification is formally designated as a \textbf{candidate specification} if and only if it satisfies both the positive acceptance (\textsc{Pass}$_{\text{all}}$) and the negative-case rejection (\textsc{Reject}$_{\text{all}}$) criteria. 
+% Only these candidate specifications are retained for subsequent equivalence analysis to ensure logical consistency and precision.
+
+\textbf{Negative Test Rejection (\textsc{Reject}$_{\text{all}}$).}
+Passing all positive test cases alone is insufficient to rule out overly permissive specifications. 
+We evaluate specifications against automatically generated negative test cases. 
+For each negative case, we prompt the LLM to judge whether the specification accepts it; if so, the LLM attempts to construct a formal acceptance proof, where success indicates the specification is overly permissive.
+If the LLM judges rejection, we skip the formal proof as proving rejection can be harder.
+A specification passes \textsc{Reject}$_{\text{all}}$ only if no negative example can be proven acceptable.
+\textsc{Reject}$_{\text{all}}$ serves as our core metric: only specifications satisfying both \textsc{Pass}$_{\text{all}}$ and \textsc{Reject}$_{\text{all}}$ are designated as \textbf{candidate specifications}.
+
+In practice, candidate specifications serve as a reliable starting point for full formal verification, where correctness established on test cases is generalized to all inputs satisfying the precondition. This avoids the costly scenario of attempting complete formal proofs on flawed specifications.
+
+
+% \textbf{Equivalence Verification.}
+% For \textbf{candidate specification} from human-written and LLM-generated specifications, we attempt to establish their semantic equivalence by proving mutual entailment. Concretely, we verify whether the human-written specification implies the LLM-generated one and, symmetrically, whether the LLM-generated specification implies the human-written one, for all possible input/output pairs. If both directions hold, we consider the two specifications to be semantically equivalent.
+
+% \subsection{Research Questions}
+% We aim to evaluate the capability of LLMs to both generate formal specifications and verify them. To this end, we formulate four research questions (RQs). Each question is tightly coupled with the \textsc{Coins} evaluation framework.
+
+% \subsubsection{RQ1: Model Performance}
+% How do different LLMs perform on \textsc{Coins}? To comprehensively answer this question, we select a diverse set of frontier models from multiple organizations and release cycles: GPT-4o and GPT-5 from OpenAI, DeepSeek-V3.1 from DeepSeek, Claude-Sonnet-3.7 and Claude-Opus-4.5 from Anthropic, and Gemini-3-Pro from Google. 
+
+% In our experimental design, each model assumes two roles: (1) as the \emph{generation model} responsible for synthesizing Rocq specifications during the preparation phase, and (2) as the \emph{proof model} responsible for discharging proof obligations during the evaluation phase. By systematically crossing these two dimensions, we construct a capability matrix that disentangles specification quality from proof synthesis ability. Based on the aggregated results, we select the best-performing model for subsequent experiments, including human--LLM specification divergence analysis (RQ2) and other in-depth investigations.
+
+
+% \subsubsection{RQ2: Human--LLM Specification Divergence}
+% To what extent do LLM-generated specifications diverge from human-written ones? We investigate this question through a two-phase experimental design.
+
+% First, we evaluate all models on the \textsc{Pass}$_1$ stage using human-written specifications as the proof target. This isolates proof synthesis capability from specification quality, allowing us to verify whether the best-performing model identified in RQ1 maintains its advantage when operating on human-authored formalizations.
+
+% Second, having confirmed the strongest model, we execute the complete \textsc{Coins} pipeline using both human-written and LLM-generated specifications, with the strongest model serving as the proof engine. We hypothesize that human-written specifications are of higher quality and thus yield better evaluation outcomes. By comparing pass rates across pipeline stages and analyzing cases where the two sources diverge—especially those failing isomorphism despite passing acceptance and rejection filters
+
+% \subsubsection{RQ3: Problem Category Effects}
+
+
+% \subsubsection{RQ4: Executability and Proof Complexity}

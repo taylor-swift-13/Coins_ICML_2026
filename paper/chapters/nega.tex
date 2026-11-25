@@ -1,0 +1,99 @@
+\section{Negative Test Cases Generation}
+\label{appendix:nega}
+
+We supplement positive test cases with automatically generated \emph{negative cases} via mutation testing to detect overly permissive specifications that may incorrectly accept faulty implementations. This Appendix details our negative case generation methodology.
+
+\subsection{Overview}
+
+Our approach leverages mutated versions of canonical implementations as oracles for identifying inputs that distinguish correct from incorrect behavior. Given a canonical implementation $f$ and a mutant $f'$, if there exists an input $x$ such that $f(x) \neq f'(x)$, then the pair $(x, f'(x))$ constitutes a \emph{negative case}---a test case on which the original implementation would fail.
+
+\subsection{Mutation Operators}
+
+We employ a two-stage mutation strategy: first applying efficient deterministic mutations, then falling back to LLM-guided mutations only when necessary.
+
+% \textbf{Stage 1: AST-Based Mutations (Primary).}
+% Our deterministic mutation engine applies the following operator categories to the Abstract Syntax Tree (AST) of canonical solutions:
+% \begin{itemize}[leftmargin=*,nosep]
+%     \item \textbf{Binary operators:} $+$ $\leftrightarrow$ $-$, $\times$ $\leftrightarrow$ $\div$, $\%$ $\to$ $/$, $//$ $\to$ $/$
+%     \item \textbf{Comparison operators:} $==$ $\leftrightarrow$ $!=$, $<$ $\leftrightarrow$ $\geq$, $>$ $\leftrightarrow$ $\leq$
+%     \item \textbf{Logical operators:} \texttt{and} $\leftrightarrow$ \texttt{or}
+%     \item \textbf{Constants:} $0 \to 1$, non-zero $\to 0$, \texttt{True} $\leftrightarrow$ \texttt{False}
+% \end{itemize}
+% For each task, we generate up to 5 mutants by randomly selecting mutation points. This approach is fast, reproducible, and sufficient for most tasks.
+
+% \textbf{Stage 2: LLM-Guided Mutations (Fallback).}
+% Only when AST-based mutations fail to generate sufficient negative cases, we employ LLMs to generate semantically meaningful mutations. The LLM is prompted to introduce subtle bugs that preserve syntactic validity while altering program semantics (\emph{e.g.}, off-by-one errors, incorrect boundary handling, or swapped variable references). This fallback ensures coverage for tasks where simple syntactic mutations are ineffective.
+
+\textbf{Stage 1: AST-Based Mutations.}
+Our deterministic mutation engine applies the following operator categories to the Abstract Syntax Tree (AST) of canonical solutions:
+\begin{itemize}[leftmargin=*,nosep]
+    \item \textbf{Binary operators:} $+$ $\leftrightarrow$ $-$, $\times$ $\leftrightarrow$ $\div$, $\%$ $\to$ $/$, $//$ $\to$ $/$
+    \item \textbf{Comparison operators:} $==$ $\leftrightarrow$ $!=$, $<$ $\leftrightarrow$ $\geq$, $>$ $\leftrightarrow$ $\leq$
+    \item \textbf{Logical operators:} \texttt{and} $\leftrightarrow$ \texttt{or}
+    \item \textbf{Constants:} $0 \to 1$, non-zero $\to 0$, \texttt{True} $\leftrightarrow$ \texttt{False}
+\end{itemize}
+For each task, we generate up to 5 mutants by randomly selecting mutation points. This approach is fast, reproducible, and covers most structural deviations.
+
+\textbf{Stage 2: LLM-Guided Mutations.}
+To complement AST-based mutations, we employ LLMs to generate semantically meaningful mutations that are difficult to express as syntactic rewrites. The LLM is prompted to introduce subtle bugs that preserve syntactic validity while altering program semantics (\emph{e.g.}, off-by-one errors, incorrect boundary handling, or swapped variable references). This stage targets semantic deviations that AST-level operators alone may miss, such as algorithmic logic errors or context-dependent faults.
+
+Together, the two stages are designed to cover both structural and semantic dimensions: Stage~1 provides systematic, reproducible syntactic coverage, while Stage~2 adds harder-to-detect semantic mutants. 
+
+\subsection{Negative Case Generation Algorithm}
+
+Algorithm~\ref{alg:negative-case} presents our negative case generation procedure in two phases.
+
+\begin{algorithm}[H]
+\caption{Negative Case Generation via Mutation Testing}
+\label{alg:negative-case}
+\begin{algorithmic}[1]
+\REQUIRE Canonical implementation $f$, test inputs $\mathcal{I}$, mutants $\mathcal{M}$, target $k$
+\ENSURE Negative cases $\mathcal{C}$
+\STATE $\mathcal{C} \gets \emptyset$
+\STATE \COMMENT{Phase 1: Test existing inputs against mutants}
+\FORALL{$x \in \mathcal{I}$}
+    \FORALL{$f' \in \mathcal{M}$}
+        \IF{$f'(x) \neq f(x)$}
+            \STATE $\mathcal{C} \gets \mathcal{C} \cup \{(x, f'(x))\}$
+        \ENDIF
+    \ENDFOR
+\ENDFOR
+\STATE
+\STATE \COMMENT{Phase 2: Generate new inputs if needed}
+\WHILE{$|\mathcal{C}| < k$}
+    \STATE $x' \gets \textsc{Mutate}(\textsc{Random}(\mathcal{I}))$
+    \FORALL{$f' \in \mathcal{M}$}
+        \IF{$f'(x') \neq f(x')$}
+            \STATE $\mathcal{C} \gets \mathcal{C} \cup \{(x', f'(x'))\}$
+        \ENDIF
+    \ENDFOR
+\ENDWHILE
+\STATE
+\STATE \textbf{return} $\textsc{Sample}(\mathcal{C}, k)$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Input Variant Generation Strategies}
+
+When direct enumeration fails to produce sufficient negative cases, we generate input variants using multiple strategies that cycle every 50 attempts:
+\textbf{(1) Random:} random perturbations;
+\textbf{(2) Small change:} minimal perturbations ($\pm 1$ for integers, $\pm 0.1$ for floats);
+\textbf{(3) Large change:} significant perturbations ($\pm 5$ to $\pm 10$);
+\textbf{(4) Expand:} append elements to collections;
+\textbf{(5) Shrink:} remove elements from collections.
+
+\subsection{Implementation Details}
+
+\paragraph{Execution.} Each code execution is bounded by a 1-second timeout; timed-out executions are treated as errors.
+
+\paragraph{Input Sources.} We extract inputs primarily from HumanEvalPlus, which provides extended test suites. When unavailable, we fall back to instrumenting the original HumanEval \texttt{check} function.
+
+\paragraph{Deduplication.} Negative cases are deduplicated via hashing of serialized $(input, output)$ pairs to ensure diversity.
+
+\subsection{Statistics}
+
+Applying this methodology to the 164 HumanEval tasks yields 1,640 negative cases. All tasks successfully generated the target number.
+
+\subsection{Usage in Evaluation}
+
+Negative cases serve as negative examples during specification evaluation. A specification is considered \emph{overly permissive} if it accepts an implementation that produces incorrect outputs on these negative cases.

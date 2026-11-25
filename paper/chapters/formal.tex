@@ -1,0 +1,124 @@
+\section{Theoretical Foundations}
+\label{appendix:theory}
+
+% 定义理论中的谓词记号
+\newcommand{\passmark}{\mathcal{P}_{\text{all}}}
+\newcommand{\rejectmark}{\mathcal{R}_{\text{all}}}
+
+We formalize the behavior of a Large Language Model (LLM) acting as a theorem prover within the context of specification verification. This abstraction enables rigorous analysis of the fundamental limitations inherent in using LLMs for formal verification tasks.
+
+\subsection{LLM as a Probabilistic Prover}
+\label{appendix:llm-model}
+
+Consider a specification $S$ defined as a logical predicate over input-output pairs. Given a test case $(i, o)$ consisting of an input $i$ and output $o$, we say that $S$ \emph{accepts} the test case, denoted $S(i, o) = \top$, if the input-output pair satisfies the specification. Conversely, $S$ \emph{rejects} the test case, denoted $S(i, o) = \bot$, if the pair violates the specification.
+
+We model an LLM-based prover as a probabilistic program $\mathcal{M}$ that takes as input a specification $S$ and a test case $(i, o)$, and attempts to produce a proof of acceptance.
+
+\begin{definition}[LLM Proving Oracle]
+\label{def:llm-oracle}
+Let $\mathcal{M}$ be an LLM-based prover. For a specification $S$ and test case $(i, o)$, define the random variable $\textsc{Verify}_{\mathcal{M}}(S, i, o) \in \{\texttt{proof}, \bot\}$ as follows:
+\begin{itemize}[leftmargin=1.5em, itemsep=4pt, topsep=4pt]
+    \item If $S(i, o) = \top$ (true acceptance):
+    \begin{align}
+    \Pr[\textsc{Verify}_{\mathcal{M}}(S, i, o) = \texttt{proof}] &= p_{S,i,o} \\
+    \Pr[\textsc{Verify}_{\mathcal{M}}(S, i, o) = \bot] &= 1 - p_{S,i,o}
+    \end{align}
+    where $p_{S,i,o} \in [0, 1]$ is the \emph{proof success probability}, depending on $S$, $(i, o)$, and $\mathcal{M}$.
+    \item If $S(i, o) = \bot$ (true rejection):
+    \begin{align}
+    \Pr[\textsc{Verify}_{\mathcal{M}}(S, i, o) = \texttt{proof}] &= 0 \\
+    \Pr[\textsc{Verify}_{\mathcal{M}}(S, i, o) = \bot] &= 1
+    \end{align}
+\end{itemize}
+\end{definition}
+
+The second case captures the fundamental \emph{soundness} property: the LLM cannot produce a valid proof for a false proposition, as any generated proof would be rejected by the Rocq type checker.
+
+\subsection{The Undecidability of Verification Failure}
+
+A critical consequence of our model is that verification failure is fundamentally uninformative about specification correctness.
+
+\begin{theorem}[Verification Undecidability]
+\label{thm:undecidability}
+When $\textsc{Verify}_{\mathcal{M}}(S, i, o) = \bot$, it is impossible to determine whether $S(i, o) = \top$ or $S(i, o) = \bot$ without additional information about $p_{S,i,o}$.
+\end{theorem}
+
+\begin{proof}
+Consider two scenarios producing identical observable outcomes:
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt, topsep=2pt]
+    \item $S(i, o) = \top$ but $p_{S,i,o}$ is small, i.e., the proof is difficult.
+    \item $S(i, o) = \bot$, i.e., no valid proof exists.
+\end{itemize}
+Both yield $\textsc{Verify}_{\mathcal{M}}(S, i, o) = \bot$. Without knowledge of $p_{S,i,o}$, these are observationally indistinguishable.
+\end{proof}
+
+This theorem reveals a fundamental Finding \ref{duality} \emph{evaluation duality}: when verification fails, the fault may lie in either the specification (generator error) or the prover (prover limitation). This provides the formal basis for the ``Evaluation Duality'' observation in Section~\ref{sec:rq1}.
+
+A key insight is the \emph{information asymmetry} between outcomes:
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt, topsep=2pt]
+    \item Positive evidence ($\textsc{Verify} = \texttt{proof}$) guarantees $S(i,o) = \top$ by Rocq's soundness.
+    \item Negative evidence ($\textsc{Verify} = \bot$) provides no definitive information.
+\end{itemize}
+This asymmetry motivates using successful proof construction as the primary evaluation criterion.
+
+\subsection{Factors Affecting Proof Success Probability}
+
+The proof success probability $p_{S,i,o}$ varies based on multiple factors:
+\begin{itemize}[leftmargin=1.5em, itemsep=4pt, topsep=4pt]
+    \item \emph{Proof complexity}: $p_{S,i,o}$ decreases as proof difficulty increases, including proof length, need for auxiliary lemmas, and sophisticated tactics. Our experiments in Section~\ref{sec:rq2} support this: all models show substantial drops from \textsc{Pass}$_{\text
+    {first}}$ to \textsc{Pass}$_{\text{all}}$ (e.g., Gemini 3 Pro Preview: 60.98\% $\to$ 28.05\%).
+    \item \emph{Specification style}: executable components (\texttt{Fixpoint}) often admit simpler proofs via computation, increasing $p_{S,i,o}$; pure relational specifications (\texttt{Inductive}) may require explicit inductive reasoning, decreasing $p_{S,i,o}$. This is empirically validated in Section~\ref{sec:rq4}.
+    \item \emph{Test case complexity}: larger inputs or edge cases require more intricate proof steps, reducing $p_{S,i,o}$.
+    \item \emph{Model capability}: different LLMs exhibit varying $p_{S,i,o}$ for the same task, as shown in Table~\ref{tab:verification}.
+\end{itemize}
+
+\subsection{Formal Analysis of the \ours{} Framework}
+
+We provide formal justification for our evaluation stages (Section~\ref{sec:framework}). To distinguish \emph{metrics} (percentages in experiments) from \emph{predicates} (boolean functions), we use:
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt, topsep=2pt]
+    \item $\passmark(S), \rejectmark(S) \in \{\top, \bot\}$: predicates on specification $S$.
+    \item \textsc{Pass}$_{\text{all}}$, \textsc{Reject}$_{\text{all}}$: metrics representing the proportion of specifications satisfying the predicates.
+\end{itemize}
+
+\paragraph{The $\passmark$ predicate.}
+Let $\mathcal{T}^{+} = \{(i_1, o_1), \ldots, (i_n, o_n)\}$ be the positive test cases. Define:
+\begin{equation}
+\passmark(S) = \top \iff \forall (i, o) \in \mathcal{T}^{+} : \textsc{Verify}_{\mathcal{M}}(S, i, o) = \texttt{proof}
+\end{equation}
+The metric \textsc{Pass}$_{\text{all}} = |\{S : \passmark(S) = \top\}| / N$ where $N$ is the total number of specifications. By Rocq's soundness, $\passmark(S) = \top$ implies $S$ accepts all positive test cases: $\forall (i, o) \in \mathcal{T}^{+} : S(i, o) = \top$. Note that $\passmark(S) = \bot$ does not imply incorrectness---it may indicate low $p_{S,i,o}$ for some test cases.
+
+\paragraph{The $\rejectmark$ predicate.}
+Let $\mathcal{T}^{-} = \{(i'_1, o'_1), \ldots, (i'_m, o'_m)\}$ be the negative cases (Section~\ref{sec:neg-cases}). Define:
+\begin{equation}
+\rejectmark(S) = \top \iff \forall (i', o') \in \mathcal{T}^{-} : \textsc{Verify}_{\mathcal{M}}(S, i', o') = \bot
+\end{equation}
+If $\textsc{Verify}_{\mathcal{M}}(S, i', o') = \texttt{proof}$ for any $(i', o') \in \mathcal{T}^{-}$, then $S$ is provably overly permissive. Conversely, $\rejectmark(S) = \top$ does not guarantee $S$ rejects all negative cases---the LLM may fail to find proofs even when they exist.
+
+\paragraph{Candidate specifications.}
+A specification $S$ with $\passmark(S) = \rejectmark(S) = \top$ is a \emph{candidate specification} (corresponding to specifications passing \textsc{Reject}$_\text{all}$ in Table~\ref{tab:generation}). Such specifications:
+\begin{itemize}[leftmargin=1.5em, itemsep=2pt, topsep=2pt]
+    \item provably accept all positive test cases;
+    \item are not provably overly permissive;
+    \item may still be incorrect in ways not captured by the test suite.
+\end{itemize}
+
+\subsection{Why Full Equivalence Proving is Impractical}
+
+Consider proving equivalence $\forall\, i, o : S_1(i, o) \Leftrightarrow S_2(i, o)$. Unlike test-case verification, this requires handling arbitrary inputs through induction. Let $p_{\text{equiv}}$ denote the success probability; empirically $p_{\text{equiv}} \ll p_{S,i,o}$.
+
+Our results in Appendix~\ref{appendix:human-llm} confirm this: among specifications passing all test-based criteria, only 31.0\% yield provably isomorphic specifications. This illustrates the
+Finding \ref{trade-off} \emph{verification complexity trade-off}: as verification complexity increases, proof success probability decreases, causing systematic underestimation of specification quality.
+
+\subsection{Design Principles}
+
+Our analysis yields four design principles:
+
+\textbf{Exploit asymmetry.} Maximize use of positive evidence while acknowledging uncertainty in negative evidence.
+
+\textbf{Calibrate difficulty.} Avoid verification tasks that are too difficult; overly complex proof obligations lead to uniformly low $p_{S,i,o}$, preventing meaningful differentiation between specifications.
+
+\textbf{Use strongest prover.} Maximize $p_{S,i,o}$ to minimize false negatives from prover limitations.
+
+\textbf{Anchor the duality.} Use known-good artifacts (human specifications) to anchor assessment.
+
+The \ours{} framework embodies these principles through test-case-based verification, Gemini 3 Pro Preview as prover (Section~\ref{sec:rq1}), human specification anchors (Section~\ref{sec:rq3}), and epistemic humility about failed proofs.

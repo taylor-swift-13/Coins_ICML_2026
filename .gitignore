@@ -1,0 +1,39 @@
+# Ignore VS Code workspace settings and local configs
+.vscode/
+docs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Logs
+log/
+runs/
+*.log
+
+# Generated experiment results stay local; input specifications remain tracked.
+/spec/*/output/
+/spec/*/test/
+/spec/*/bad/
+/spec/*/pass_all/
+/equiv/output/
+/negative/output/
+/negative/fail_all/
+/experiments/
+
+# Coq compiled files
+*.vo
+*.vosX
+*.vok
+*.glob
+.*.aux
+
+# OS
+.DS_Store
+Thumbs.db
